@@ -193,6 +193,13 @@ uint8_t iFader_value[ciFader_Count] = {0,0,0,0};
 /**************************************************/
 const byte cbPIN_DMX_direction = 2;
 
+/**************************************************/
+/**  Fixtures                                    **/
+/**************************************************/
+const uint8_t ciFixture_Count = 3;
+uint8_t iFixture_values[ciFixture_Count][ciFader_Count];
+uint8_t iFixture_current = 0;
+
 /************************************************/
 /** other things...                            **/
 /************************************************/
@@ -299,7 +306,8 @@ void handleMenu_Main(Print &pOut, char *caCommand) {
 			pOut.println(F("\t 'x': tests"));
 			pOut.println();
 			pOut.println(F("\t 'A': Show 'HelloWorld' "));
-			pOut.println(F("\t 'f': DemoFadeTo(ID, value) 'f1:65535'"));
+			pOut.println(F("\t 'f': select next fixture 'f'"));
+			pOut.println(F("\t 'F': set current fixture 'F0'..'F2'"));
 			pOut.println();
 			pOut.println(F("\t 'set:' enter SubMenu1"));
 			pOut.println();
@@ -350,15 +358,26 @@ void handleMenu_Main(Print &pOut, char *caCommand) {
 			pOut.println(F("\t Hello World! :-)"));
 		} break;
 		case 'f': {
-			pOut.print(F("\t DemoFadeTo "));
-			byte bID = atoi(&caCommand[1]);
+			pOut.println(F("\t select next fixture "));
+			fixtureSelectNext();
+		} break;
+		case 'F': {
+			pOut.print(F("\t set current fixture "));
+
+			uint8_t bID = atoi(&caCommand[1]);
+
 			pOut.print(bID);
-			pOut.print(F(" : "));
-			uint16_t wValue = atoi(&caCommand[3]);
-			pOut.print(wValue);
+			// pOut.print(F(" : "));
+			// uint16_t wValue = atoi(&caCommand[3]);
+			// pOut.print(wValue);
 			pOut.println();
-			//demo_fadeTo(bID, wValue);
-			pOut.print(F("\t demo for parsing values --> finished."));
+
+			if (bID >= ciFixture_Count) {
+				bID = ciFixture_Count-1;
+			}
+
+			iFixture_current = bID;
+			// pOut.print(F("\t demo for parsing values --> finished."));
 		} break;
 		//--------------------------------------------------------------------------------
 		case 's': {
@@ -586,6 +605,22 @@ void readFader(){
 	}
 }
 
+void mapFader2Fixture() {
+	for (uint8_t indexCh = 0; indexCh < ciFader_Count; indexCh++) {
+		iFixture_values[iFixture_current][indexCh] = iFader_value[indexCh]
+	}
+}
+
+void fixtureSelectNext() {
+	uint8_t newId = iFixture_current +1;
+
+	if (newId >= ciFixture_Count) {
+		newId = ciFixture_Count-1;
+	}
+
+	iFixture_current = newId;
+}
+
 /************************************************/
 /** Display                                    **/
 /************************************************/
@@ -614,14 +649,40 @@ void displayFaderValues() {
 	}
 }
 
+void displayFixture() {
+	lcd.setCursor(14, 0);
+	lcd.print("F");
+	lcd.setCursor(15, 0);
+	lcd.print(iFixture_current);
+}
+
+void displayUpdate() {
+	displayFixture();
+	displayFaderValues();
+}
+
 /************************************************/
 /** DMX handling                               **/
 /************************************************/
 
-void sendDMXValues() {
+void dmxUpdateFaderValuesDirect() {
+	// simple direct fader send
 	for (uint8_t i = 0; i < ciFader_Count; i++) {
 		DMXSerial.write(i+1, iFader_value[i]);
 	}
+}
+
+void dmxUpdateFixtureValues() {
+	for (uint8_t indexFixture = 0; indexFixture < ciFixture_Count; indexFixture++) {
+		for (uint8_t indexCh = 0; indexCh < ciFader_Count; indexCh++) {
+			DMXSerial.write(i+1, iFixture_values[indexFixture][indexCh]);
+		}
+	}
+}
+
+void dmxUpdate() {
+	dmxUpdateFaderValuesDirect();
+	// dmxUpdateFixtureValues();
 }
 
 /**************************************************/
@@ -722,6 +783,22 @@ void setup() {
 		}
 		Serial.println(F("\t finished."));
 
+	/************************************************/
+	/** initialize fixture array                   **/
+	/************************************************/
+
+		Serial.print(F("# Free RAM = "));
+		Serial.println(freeRam());
+
+		Serial.println(F("initialize fixture array:")); {
+
+			// Serial.println(F("\t init to 2x16"));
+			// http://www.cplusplus.com/reference/cstring/memset/
+			// memset(iFixture_values, 0, ciFixture_Count*ciFader_Count);
+			memset(iFixture_values, 0, sizeof(iFixture_values)/sizeof(uint8_t));
+		}
+		Serial.println(F("\t finished."));
+
 
 	/************************************************/
 	/** show Serial Commands                       **/
@@ -766,17 +843,18 @@ void loop() {
 	/** handle input                                 **/
 	/**************************************************/
 		readFader();
+		mapFader2Fixture();
 
 	/**************************************************/
 	/** update dispay                                **/
 	/**************************************************/
-		displayFaderValues();
+		displayUpdate();
 
 	/**************************************************/
 	/** send DMX                                     **/
 	/**************************************************/
-		sendDMXValues();
-		
+		dmxUpdate();
+
 	/**************************************************/
 	/** Timed things                                 **/
 	/**************************************************/
