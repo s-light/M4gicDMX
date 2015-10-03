@@ -28,6 +28,8 @@ https://github.com/DavidAndrews/Arduino_LCD_Menu
 
 https://github.com/mathertel/DMXSerial
 
+https://github.com/s-light/slight_ButtonInput
+
 http://playground.arduino.cc/Main/InterfacingWithHardware#ui
 connector pinout:
 https://en.wikipedia.org/wiki/DMX512#XLR-3_pinout

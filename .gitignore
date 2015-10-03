@@ -1,3 +1,7 @@
+# manual backups
+**/old
+*.zip
+
 # Compiled Object files
 *.slo
 *.lo

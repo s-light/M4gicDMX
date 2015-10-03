@@ -12,7 +12,10 @@
 		~ DMXSerial
 			Copyright (c) 2005-2012 by Matthias Hertel,
 			http://www.mathertel.de
-
+		~ slight_ButtonInput
+			written by stefan krueger (s-light),
+				stefan@s-light.eu, http://s-light.eu, https://github.com/s-light/
+			cc by sa, Apache License Version 2.0, MIT
 
 	written by vincent maurer (BrixFX),
 		github@s-light.eu, https://github.com/brixfx/
@@ -64,6 +67,8 @@
 #include <LiquidCrystal.h>
 
 #include <DMXSerial.h>
+
+#include <slight_ButtonInput.h>
 
 
 /**************************************************************************************************/
@@ -167,7 +172,21 @@ class DualWriter : public Print{
 // DualWriter dwOUT( Serial, Serial1);
 
 
+/**************************************************/
+/**  slight ButtonInput                          **/
+/**************************************************/
 
+slight_ButtonInput myButtonFixture(
+	42, // uint8_t cbID_New
+	15, // uint8_t cbPin_New,
+	myInput_callback_GetInput, // tCbfuncGetInput cbfuncGetInput_New,
+	myInput_callback_onEvent, // tcbfOnEvent cbfCallbackOnEvent_New,
+	  30, // const uint16_t cwDuration_Debounce_New = 30,
+	2000, // const uint16_t cwDuration_HoldingDown_New = 1000,
+	  50, // const uint16_t cwDuration_ClickSingle_New =   50,
+	3000, // const uint16_t cwDuration_ClickLong_New =   3000,
+	 100  // const uint16_t cwDuration_ClickDouble_New = 1000
+);
 
 /************************************************/
 /** Display                                    **/
@@ -607,7 +626,7 @@ void readFader(){
 
 void mapFader2Fixture() {
 	for (uint8_t indexCh = 0; indexCh < ciFader_Count; indexCh++) {
-		iFixture_values[iFixture_current][indexCh] = iFader_value[indexCh]
+		iFixture_values[iFixture_current][indexCh] = iFader_value[indexCh];
 	}
 }
 
@@ -620,6 +639,66 @@ void fixtureSelectNext() {
 
 	iFixture_current = newId;
 }
+
+/************************************************/
+/**  slight_ButtonInput things                 **/
+/************************************************/
+
+boolean myInput_callback_GetInput(uint8_t bID, uint8_t bPin) {
+	// read input invert reading - button closes to GND.
+	// check HWB
+	// return ! (PINE & B00000100);
+	return ! digitalRead(bPin);
+}
+
+
+void myInput_callback_onEvent(slight_ButtonInput *pInstance, uint8_t bEvent) {
+
+	// Serial.print(F("Instance ID:"));
+	// Serial.println((*pInstance).getID());
+
+	// Serial.print(F("Event: "));
+	// (*pInstance).printEvent(Serial, bEvent);
+	// Serial.println();
+
+	// show event additional infos:
+	switch (bEvent) {
+		/*case slight_ButtonInput::event_StateChanged : {
+			Serial.print(F("\t state: "));
+			(*pInstance).printState(Serial);
+			Serial.println();
+		} break;*/
+		// click
+		/*case slight_ButtonInput::event_Down : {
+			Serial.println(F("the button is pressed down! do something.."));
+		} break;*/
+		/*case slight_ButtonInput::event_HoldingDown : {
+			Serial.print(F("duration active: "));
+			Serial.println((*pInstance).getDurationActive());
+		} break;*/
+		/*case slight_ButtonInput::event_Up : {
+			Serial.println(F("up"));
+		} break;*/
+		case slight_ButtonInput::event_Click : {
+			Serial.println(F("click"));
+			fixtureSelectNext();
+		} break;
+		// case slight_ButtonInput::event_ClickLong : {
+		// 	Serial.println(F("click long"));
+		// } break;
+		/*case slight_ButtonInput::event_ClickDouble : {
+			Serial.println(F("click double"));
+		} break;*/
+		/*case slight_ButtonInput::event_ClickTriple : {
+			Serial.println(F("click triple"));
+		} break;*/
+		/*case slight_ButtonInput::event_ClickMulti : {
+			Serial.print(F("click count: "));
+			Serial.println((*pInstance).getClickCount());
+		} break;*/
+	} //end switch
+}
+
 
 /************************************************/
 /** Display                                    **/
@@ -675,14 +754,17 @@ void dmxUpdateFaderValuesDirect() {
 void dmxUpdateFixtureValues() {
 	for (uint8_t indexFixture = 0; indexFixture < ciFixture_Count; indexFixture++) {
 		for (uint8_t indexCh = 0; indexCh < ciFader_Count; indexCh++) {
-			DMXSerial.write(i+1, iFixture_values[indexFixture][indexCh]);
+			DMXSerial.write(
+				indexFixture + indexCh + 1,
+				iFixture_values[indexFixture][indexCh]
+			);
 		}
 	}
 }
 
 void dmxUpdate() {
-	dmxUpdateFaderValuesDirect();
-	// dmxUpdateFixtureValues();
+	// dmxUpdateFaderValuesDirect();
+	dmxUpdateFixtureValues();
 }
 
 /**************************************************/
@@ -784,6 +866,25 @@ void setup() {
 		Serial.println(F("\t finished."));
 
 	/************************************************/
+	/** start slight_ButtonInput                   **/
+	/************************************************/
+		Serial.print(F("# Free RAM = "));
+		Serial.println(freeRam());
+
+		Serial.println(F("slight_ButtonInput:"));
+		{
+			Serial.println(F("\t pinMode INPUT_PULLUP"));
+			// pinMode(myButtonFixture.getPin(), INPUT_PULLUP);
+			pinMode(myButtonFixture.getPin(), INPUT);
+			digitalWrite(myButtonFixture.getPin(), HIGH);
+
+			Serial.println(F("\t myButtonFixture.begin();"));
+			myButtonFixture.begin();
+
+		}
+		Serial.println(F("\t finished."));
+
+	/************************************************/
 	/** initialize fixture array                   **/
 	/************************************************/
 
@@ -844,6 +945,11 @@ void loop() {
 	/**************************************************/
 		readFader();
 		mapFader2Fixture();
+
+	/**************************************************/
+	/** my Button                                    **/
+	/**************************************************/
+		myButtonFixture.update();
 
 	/**************************************************/
 	/** update dispay                                **/
