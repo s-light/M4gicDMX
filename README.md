@@ -1,12 +1,10 @@
 # M4gicDMX
-Simple 4ch DMX-controller
-
-Simple DMX-controller for RGBW-LED-Fixtures
+Simple 4ch DMX-controller for RGBW-LED-Fixtures
 
 ### Functionality
-- live control
-- scene playback
-- scene recording
+- Live control
+- Scene playback
+- Scene recording
 
 ## Input / User Interface:
 - LC-Display (2x16 / 4x20)
@@ -26,6 +24,8 @@ Simple DMX-controller for RGBW-LED-Fixtures
 - Menu system
 - LC-Display content generation (different screens)
 - DMX-Transmitter
+    - Live generation
+    - Playback generation
 - Input handling
     - Fader
     - SD-Card
@@ -33,3 +33,11 @@ Simple DMX-controller for RGBW-LED-Fixtures
     - Encoder
     - Infrared receiver
     - Bluetooth
+
+
+## some random infos to remember
+https://github.com/DavidAndrews/Arduino_LCD_Menu
+
+https://github.com/mathertel/DMXSerial
+
+http://playground.arduino.cc/Main/InterfacingWithHardware#ui
