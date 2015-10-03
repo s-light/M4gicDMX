@@ -178,7 +178,7 @@ class DualWriter : public Print{
 
 slight_ButtonInput myButtonFixture(
 	42, // uint8_t cbID_New
-	15, // uint8_t cbPin_New,
+	6, // uint8_t cbPin_New,
 	myInput_callback_GetInput, // tCbfuncGetInput cbfuncGetInput_New,
 	myInput_callback_onEvent, // tcbfOnEvent cbfCallbackOnEvent_New,
 	  30, // const uint16_t cwDuration_Debounce_New = 30,
@@ -634,7 +634,7 @@ void fixtureSelectNext() {
 	uint8_t newId = iFixture_current +1;
 
 	if (newId >= ciFixture_Count) {
-		newId = ciFixture_Count-1;
+		newId = 0;
 	}
 
 	iFixture_current = newId;
@@ -657,9 +657,9 @@ void myInput_callback_onEvent(slight_ButtonInput *pInstance, uint8_t bEvent) {
 	// Serial.print(F("Instance ID:"));
 	// Serial.println((*pInstance).getID());
 
-	// Serial.print(F("Event: "));
-	// (*pInstance).printEvent(Serial, bEvent);
-	// Serial.println();
+	Serial.print(F("Event: "));
+	(*pInstance).printEvent(Serial, bEvent);
+	Serial.println();
 
 	// show event additional infos:
 	switch (bEvent) {
