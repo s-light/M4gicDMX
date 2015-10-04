@@ -754,10 +754,16 @@ void fixtureToggle(uint8_t fixtureID) {
 		// check if fixture is selected (= bit set)
 		if( (fixture_selected & (1 << fixtureID)) > 0) {
 			// move focus to this fixtureID:
-			fixture_current = fixtureID+1;
+			fixture_ID_new = fixtureID+1;
 		} else {
 			// set current to 0 (= no fixture)
-			fixture_current = 0;
+			fixture_ID_new = 0;
+		}
+
+		if(fixture_ID_new != fixture_current) {
+			fixture_current = fixture_ID_new;
+			// reset fader_value_live
+			fader_value_live = B00000000;
 		}
 
 	}
