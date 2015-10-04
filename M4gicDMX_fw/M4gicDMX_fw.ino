@@ -176,17 +176,84 @@ class DualWriter : public Print{
 /**  slight ButtonInput                          **/
 /**************************************************/
 
-slight_ButtonInput myButtonFixture(
-	42, // uint8_t cbID_New
-	6, // uint8_t cbPin_New,
-	myInput_callback_GetInput, // tCbfuncGetInput cbfuncGetInput_New,
-	myInput_callback_onEvent, // tcbfOnEvent cbfCallbackOnEvent_New,
-	  30, // const uint16_t cwDuration_Debounce_New = 30,
-	2000, // const uint16_t cwDuration_HoldingDown_New = 1000,
-	  50, // const uint16_t cwDuration_ClickSingle_New =   50,
-	3000, // const uint16_t cwDuration_ClickLong_New =   3000,
-	 100  // const uint16_t cwDuration_ClickDouble_New = 1000
-);
+// slight_ButtonInput myButtonFixture(
+// 	42, // uint8_t cbID_New
+// 	6, // uint8_t cbPin_New,
+// 	myButton_getInput, // tCbfuncGetInput cbfuncGetInput_New,
+// 	myButton_onEvent, // tcbfOnEvent cbfCallbackOnEvent_New,
+// 	  30, // const uint16_t cwDuration_Debounce_New = 30,
+// 	2000, // const uint16_t cwDuration_HoldingDown_New = 1000,
+// 	  50, // const uint16_t cwDuration_ClickSingle_New =   50,
+// 	3000, // const uint16_t cwDuration_ClickLong_New =   3000,
+// 	 100  // const uint16_t cwDuration_ClickDouble_New = 1000
+// );
+
+
+/*slight_ButtonInput(
+	byte cbID_New,
+	byte cbPin_New,
+	tCbfuncGetInput cbfuncGetInput_New,
+	tcbfOnEvent cbfCallbackOnEvent_New,
+	const uint16_t cwDuration_Debounce_New = 30,
+	const uint16_t cwDuration_HoldingDown_New = 1000,
+	const uint16_t cwDuration_ClickSingle_New = 50,
+	const uint16_t cwDuration_ClickLong_New = 3000,
+	const uint16_t cwDuration_ClickDouble_New = 500 );
+*/
+const uint16_t cwButton_Debounce		=   30;
+const uint16_t cwButton_HoldingDown		= 2000;
+const uint16_t cwButton_ClickSingle		=   50;
+const uint16_t cwButton_ClickLong		= 5000;
+const uint16_t cwButton_ClickDouble		=  300;
+
+const byte myButtons_cbCount = 4;
+slight_ButtonInput myButtons[myButtons_cbCount] = {
+	slight_ButtonInput(
+		0,
+		6,
+		myButton_getInput,
+		myButton_onEvent,
+		cwButton_Debounce,
+		cwButton_HoldingDown,
+		cwButton_ClickSingle,
+		cwButton_ClickLong,
+		cwButton_ClickDouble
+	),
+	slight_ButtonInput(
+		1,
+		5,
+		myButton_getInput,
+		myButton_onEvent,
+		cwButton_Debounce,
+		cwButton_HoldingDown,
+		cwButton_ClickSingle,
+		cwButton_ClickLong,
+		cwButton_ClickDouble
+	),
+	slight_ButtonInput(
+		2,
+		4,
+		myButton_getInput,
+		myButton_onEvent,
+		cwButton_Debounce,
+		cwButton_HoldingDown,
+		cwButton_ClickSingle,
+		cwButton_ClickLong,
+		cwButton_ClickDouble
+	),
+	slight_ButtonInput(
+		3,
+		3,
+		myButton_getInput,
+		myButton_onEvent,
+		cwButton_Debounce,
+		cwButton_HoldingDown,
+		cwButton_ClickSingle,
+		cwButton_ClickLong,
+		cwButton_ClickDouble
+	),
+};
+
 
 /************************************************/
 /** Display                                    **/
@@ -199,12 +266,14 @@ LiquidCrystal lcd(7, 8, 9, 10, 11, 12);
 /** fader                                      **/
 /************************************************/
 
-const uint8_t ciFader_Count = 4;
+const uint8_t fader_COUNT = 4;
 
-const uint8_t ciPin_Fader[ciFader_Count] = {A0, A1, A2, A3};
+const uint8_t ciPin_Fader[fader_COUNT] = {A0, A1, A2, A3};
 // const uint8_t ciPin_Fader_Count = sizeof(ciPin_Fader)/ sizeof(uint8_t);
 
-uint8_t iFader_value[ciFader_Count] = {0,0,0,0};
+uint8_t fader_value[fader_COUNT] = {0,0,0,0};
+const uint8_t fader_names[fader_COUNT] = {'R', 'G', 'B', 'W'};
+uint8_t fader_value_live = B00000000;
 
 
 /**************************************************/
@@ -215,9 +284,12 @@ const byte cbPIN_DMX_direction = 2;
 /**************************************************/
 /**  Fixtures                                    **/
 /**************************************************/
-const uint8_t ciFixture_Count = 3;
-uint8_t iFixture_values[ciFixture_Count][ciFader_Count];
-uint8_t iFixture_current = 0;
+const uint8_t fixture_COUNT = 3;
+uint8_t fixture_values[fixture_COUNT][fader_COUNT];
+uint8_t fixture_selected = B00000000;
+uint8_t fixture_current = 0;
+// fixture_current == 0 means no fixture. we will start to count by 1.
+// this helps to get the special case of 'no fixture selected.'
 
 /************************************************/
 /** other things...                            **/
@@ -326,7 +398,7 @@ void handleMenu_Main(Print &pOut, char *caCommand) {
 			pOut.println();
 			pOut.println(F("\t 'A': Show 'HelloWorld' "));
 			pOut.println(F("\t 'f': select next fixture 'f'"));
-			pOut.println(F("\t 'F': set current fixture 'F0'..'F2'"));
+			pOut.println(F("\t 'F': toggle fixture 'F0'..'F2'"));
 			pOut.println();
 			pOut.println(F("\t 'set:' enter SubMenu1"));
 			pOut.println();
@@ -381,7 +453,7 @@ void handleMenu_Main(Print &pOut, char *caCommand) {
 			fixtureSelectNext();
 		} break;
 		case 'F': {
-			pOut.print(F("\t set current fixture "));
+			pOut.print(F("\t toggle fixture "));
 
 			uint8_t bID = atoi(&caCommand[1]);
 
@@ -391,11 +463,7 @@ void handleMenu_Main(Print &pOut, char *caCommand) {
 			// pOut.print(wValue);
 			pOut.println();
 
-			if (bID >= ciFixture_Count) {
-				bID = ciFixture_Count-1;
-			}
-
-			iFixture_current = bID;
+			fixtureToggle(bID);
 			// pOut.print(F("\t demo for parsing values --> finished."));
 		} break;
 		//--------------------------------------------------------------------------------
@@ -617,34 +685,69 @@ void handle_SerialReceive() {
 /** input handler                              **/
 /************************************************/
 
-void readFader(){
-	for (uint8_t i = 0; i < ciFader_Count; i++) {
+void faderRead(){
+	for (uint8_t i = 0; i < fader_COUNT; i++) {
 		uint16_t iFader_raw =  analogRead(ciPin_Fader[i]);
-		iFader_value[i] = map(iFader_raw, 0, 1023, 0, 255);
+		fader_value[i] = map(iFader_raw, 0, 1023, 0, 255);
 	}
 }
 
 void mapFader2Fixture() {
-	for (uint8_t indexCh = 0; indexCh < ciFader_Count; indexCh++) {
-		iFixture_values[iFixture_current][indexCh] = iFader_value[indexCh];
+	for (uint8_t indexCh = 0; indexCh < fader_COUNT; indexCh++) {
+		fixture_values[fixture_current][indexCh] = fader_value[indexCh];
 	}
 }
 
 void fixtureSelectNext() {
-	uint8_t newId = iFixture_current +1;
+	uint8_t newId = fixture_current +1;
 
-	if (newId >= ciFixture_Count) {
-		newId = 0;
+	if (newId > fixture_COUNT) {
+		newId = 1;
 	}
 
-	iFixture_current = newId;
+	fixture_current = newId;
+}
+
+void fixtureToggle(uint8_t fixtureID) {
+	if (fixtureID < fixture_COUNT) {
+		// How do you set, clear and toggle a single bit in C/C++?
+		// http://stackoverflow.com/a/47990/574981
+		// https://www.arduino.cc/en/Reference/BitwiseAnd
+		// http://playground.arduino.cc/Code/BitMath#bitwise_xor
+
+		// toggle fixture
+		fixture_selected = fixture_selected ^ (1 << fixtureID);
+
+		// check if fixture is selected (= bit set)
+		if( (fixture_selected & (1 << fixtureID)) == 1) {
+			// move focus to this fixtureID:
+			fixture_current = fixtureID+1;
+		} else {
+			// set current to 0 (= no fixture)
+			fixture_current = 0;
+		}
+
+	}
 }
 
 /************************************************/
 /**  slight_ButtonInput things                 **/
 /************************************************/
 
-boolean myInput_callback_GetInput(uint8_t bID, uint8_t bPin) {
+void myButtons_init() {
+	for (byte bIndex = 0; bIndex < myButtons_cbCount; bIndex++) {
+		pinMode(myButtons[bIndex].getPin(), INPUT_PULLUP);
+		myButtons[bIndex].begin();
+	}
+}
+
+void myButtons_update() {
+	for (byte bIndex = 0; bIndex < myButtons_cbCount; bIndex++) {
+		myButtons[bIndex].update();
+	}
+}
+
+boolean myButton_getInput(uint8_t bID, uint8_t bPin) {
 	// read input invert reading - button closes to GND.
 	// check HWB
 	// return ! (PINE & B00000100);
@@ -652,7 +755,7 @@ boolean myInput_callback_GetInput(uint8_t bID, uint8_t bPin) {
 }
 
 
-void myInput_callback_onEvent(slight_ButtonInput *pInstance, uint8_t bEvent) {
+void myButton_onEvent(slight_ButtonInput *pInstance, uint8_t bEvent) {
 
 	// Serial.print(F("Instance ID:"));
 	// Serial.println((*pInstance).getID());
@@ -660,6 +763,8 @@ void myInput_callback_onEvent(slight_ButtonInput *pInstance, uint8_t bEvent) {
 	Serial.print(F("Event: "));
 	(*pInstance).printEvent(Serial, bEvent);
 	Serial.println();
+
+	uint8_t bButtonIndex = (*pInstance).getID();
 
 	// show event additional infos:
 	switch (bEvent) {
@@ -681,7 +786,32 @@ void myInput_callback_onEvent(slight_ButtonInput *pInstance, uint8_t bEvent) {
 		} break;*/
 		case slight_ButtonInput::event_Click : {
 			Serial.println(F("click"));
-			fixtureSelectNext();
+			// fixtureSelectNext();
+
+			// toggle Fixture selection
+			switch (bButtonIndex) {
+				// toggle fixtures
+				case 0:
+				case 1:
+				case 2:
+				case 3: {
+					fixtureToggle(bButtonIndex);
+				} break;
+				// menu
+				case 4: {
+					// enter
+				} break;
+				case 5: {
+					// back
+				} break;
+				case 6: {
+					// up
+				} break;
+				case 7: {
+					// down
+				} break;
+			}
+
 		} break;
 		// case slight_ButtonInput::event_ClickLong : {
 		// 	Serial.println(F("click long"));
@@ -704,8 +834,8 @@ void myInput_callback_onEvent(slight_ButtonInput *pInstance, uint8_t bEvent) {
 /** Display                                    **/
 /************************************************/
 
-void printByteAlignRight(Print &pOut, byte bValue) {
-	//byte bOffset = 0;
+void printByteAlignRight(Print &pOut, uint8_t bValue) {
+	//uint8_t bOffset = 0;
 	if (bValue < 100) {
 		if (bValue < 10) {
 			//bOffset = 2;
@@ -718,21 +848,63 @@ void printByteAlignRight(Print &pOut, byte bValue) {
 	pOut.print(bValue);
 }
 
+void printByteAsPercentValueAlignRight(Print &pOut, uint8_t bValue) {
+	uint8_t valueP = map(bValue, 0, 255, 0, 100);
+	if (valueP == 100) {
+		// 100 = FF
+		pOut.print(F("FF"));
+	} else {
+		if (valueP < 10) {
+			pOut.print(F(" "));
+		}
+		pOut.print(valueP);
+	}
+}
+
 
 void displayFaderValues() {
-	for (uint8_t i = 0; i < ciFader_Count; i++) {
-		uint8_t xPos = i * 4;
+	// R00*G 1 BFF W50
+	for (uint8_t index = 0; index < fader_COUNT; index++) {
+		uint8_t xPos = index * 4;
+
 		lcd.setCursor(xPos, 1);
+		lcd.print(fader_names[index]);
+
+		lcd.setCursor(xPos+1, 1);
 		// lcd.print(iFader);
-		printByteAlignRight(lcd, iFader_value[i]);
+		// printByteAlignRight(lcd, fader_value[index]);
+		printByteAsPercentValueAlignRight(lcd, fader_value[index]);
+
+		lcd.setCursor(xPos+3, 1);
+		// check if fader is live (= bit set)
+		if( (fader_value_live & (1 << index)) == 1) {
+			lcd.print(F(" "));
+		} else {
+			lcd.print(F("*"));
+		}
 	}
 }
 
 void displayFixture() {
-	lcd.setCursor(14, 0);
+	// F2:1234
+	uint8_t xPos = 16-7;
+	lcd.setCursor(xPos, 0);
 	lcd.print("F");
-	lcd.setCursor(15, 0);
-	lcd.print(iFixture_current);
+	xPos = xPos +1;
+	lcd.setCursor(xPos, 0);
+	lcd.print(fixture_current);
+	xPos = xPos +1;
+	for (uint8_t index = 0; index < fixture_COUNT; index++) {
+		uint8_t xPos2 = xPos + (index * 1);
+		lcd.setCursor(xPos2, 1);
+		// check if fixture is selected (= bit set)
+		if( (fixture_selected & (1 << index)) == 1) {
+			lcd.print(index+1);
+		} else {
+			lcd.print(F(" "));
+		}
+	}
+
 }
 
 void displayUpdate() {
@@ -746,17 +918,17 @@ void displayUpdate() {
 
 void dmxUpdateFaderValuesDirect() {
 	// simple direct fader send
-	for (uint8_t i = 0; i < ciFader_Count; i++) {
-		DMXSerial.write(i+1, iFader_value[i]);
+	for (uint8_t i = 0; i < fader_COUNT; i++) {
+		DMXSerial.write(i+1, fader_value[i]);
 	}
 }
 
 void dmxUpdateFixtureValues() {
-	for (uint8_t indexFixture = 0; indexFixture < ciFixture_Count; indexFixture++) {
-		for (uint8_t indexCh = 0; indexCh < ciFader_Count; indexCh++) {
+	for (uint8_t indexFixture = 0; indexFixture < fixture_COUNT; indexFixture++) {
+		for (uint8_t indexCh = 0; indexCh < fader_COUNT; indexCh++) {
 			DMXSerial.write(
 				indexFixture + indexCh + 1,
-				iFixture_values[indexFixture][indexCh]
+				fixture_values[indexFixture][indexCh]
 			);
 		}
 	}
@@ -873,13 +1045,16 @@ void setup() {
 
 		Serial.println(F("slight_ButtonInput:"));
 		{
-			Serial.println(F("\t pinMode INPUT_PULLUP"));
-			// pinMode(myButtonFixture.getPin(), INPUT_PULLUP);
-			pinMode(myButtonFixture.getPin(), INPUT);
-			digitalWrite(myButtonFixture.getPin(), HIGH);
+			// Serial.println(F("\t pinMode INPUT_PULLUP"));
+			// // pinMode(myButtonFixture.getPin(), INPUT_PULLUP);
+			// pinMode(myButtonFixture.getPin(), INPUT);
+			// digitalWrite(myButtonFixture.getPin(), HIGH);
+			//
+			// Serial.println(F("\t myButtonFixture.begin();"));
+			// myButtonFixture.begin();
 
-			Serial.println(F("\t myButtonFixture.begin();"));
-			myButtonFixture.begin();
+			Serial.println(F("\t init ButtonInput system"));
+			myButtons_init();
 
 		}
 		Serial.println(F("\t finished."));
@@ -895,8 +1070,8 @@ void setup() {
 
 			// Serial.println(F("\t init to 2x16"));
 			// http://www.cplusplus.com/reference/cstring/memset/
-			// memset(iFixture_values, 0, ciFixture_Count*ciFader_Count);
-			memset(iFixture_values, 0, sizeof(iFixture_values)/sizeof(uint8_t));
+			// memset(fixture_values, 0, fixture_COUNT*fader_COUNT);
+			memset(fixture_values, 0, sizeof(fixture_values)/sizeof(uint8_t));
 		}
 		Serial.println(F("\t finished."));
 
@@ -943,13 +1118,14 @@ void loop() {
 	/**************************************************/
 	/** handle input                                 **/
 	/**************************************************/
-		readFader();
+		faderRead();
 		mapFader2Fixture();
 
 	/**************************************************/
 	/** my Button                                    **/
 	/**************************************************/
-		myButtonFixture.update();
+		// myButtonFixture.update();
+		myButtons_update();
 
 	/**************************************************/
 	/** update dispay                                **/
