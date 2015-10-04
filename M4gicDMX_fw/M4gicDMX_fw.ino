@@ -198,7 +198,8 @@ class DualWriter : public Print{
 	const uint16_t cwDuration_HoldingDown_New = 1000,
 	const uint16_t cwDuration_ClickSingle_New = 50,
 	const uint16_t cwDuration_ClickLong_New = 3000,
-	const uint16_t cwDuration_ClickDouble_New = 500 );
+	const uint16_t cwDuration_ClickDouble_New = 500
+);
 */
 const uint16_t cwButton_Debounce		=   30;
 const uint16_t cwButton_HoldingDown		= 2000;
@@ -206,8 +207,8 @@ const uint16_t cwButton_ClickSingle		=   50;
 const uint16_t cwButton_ClickLong		= 5000;
 const uint16_t cwButton_ClickDouble		=  300;
 
-const byte myButtons_cbCount = 4;
-slight_ButtonInput myButtons[myButtons_cbCount] = {
+const uint8_t myButtons_COUNT = 4;
+slight_ButtonInput myButtons[myButtons_COUNT] = {
 	slight_ButtonInput(
 		0,
 		6,
@@ -692,10 +693,36 @@ void faderRead(){
 	}
 }
 
+// void mapFader2Fixture() {
+// 	for (uint8_t indexCh = 0; indexCh < fader_COUNT; indexCh++) {
+// 		fixture_values[fixture_current][indexCh] = fader_value[indexCh];
+// 	}
+// }
+
+void faderCheckLive(uint8_t faderID, uint8_t fixtureID) {
+    if(fixtureID == fixture_current) {
+    	if(fixture_values[fixtureID][faderID] == fader_value[faderID]) {
+        	// set this fader live
+			fader_value_live = fader_value_live | (1 << faderID);
+        }
+    }
+}
+
 void mapFader2Fixture() {
-	for (uint8_t indexCh = 0; indexCh < fader_COUNT; indexCh++) {
-		fixture_values[fixture_current][indexCh] = fader_value[indexCh];
-	}
+    for (uint8_t indexFixture = 0; indexFixture < fixture_COUNT; indexFixture++) {
+	    // check if fixture is selected
+	    if( (fixture_selected & (1 << indexFixture)) > 0) {
+		    // update fixture values
+		    for (uint8_t indexFader = 0; indexFader < fader_COUNT; indexFader++) {
+			    if( (fader_value_live & (1 << indexFader)) > 0) {
+			    	fixture_values[indexFixture][indexFader] = fader_value[indexFader];
+			    } else {
+				    // first check fader values!!!
+				    faderCheckLive(indexFader, indexFixture);
+			    }
+		    }
+        }
+    }
 }
 
 void fixtureSelectNext() {
@@ -715,11 +742,17 @@ void fixtureToggle(uint8_t fixtureID) {
 		// https://www.arduino.cc/en/Reference/BitwiseAnd
 		// http://playground.arduino.cc/Code/BitMath#bitwise_xor
 
+		// Test 4 XOR (toggle bit)
+		//    B100100000 Input
+		//  ^ B100000100 Mask
+		//    B000100100 Output
+
 		// toggle fixture
-		fixture_selected = fixture_selected ^ (1 << fixtureID);
+		// fixture_selected = fixture_selected ^ (1 << fixtureID);
+		fixture_selected = fixture_selected ^ (B00000001 << fixtureID);
 
 		// check if fixture is selected (= bit set)
-		if( (fixture_selected & (1 << fixtureID)) == 1) {
+		if( (fixture_selected & (1 << fixtureID)) > 0) {
 			// move focus to this fixtureID:
 			fixture_current = fixtureID+1;
 		} else {
@@ -735,14 +768,14 @@ void fixtureToggle(uint8_t fixtureID) {
 /************************************************/
 
 void myButtons_init() {
-	for (byte bIndex = 0; bIndex < myButtons_cbCount; bIndex++) {
+	for (byte bIndex = 0; bIndex < myButtons_COUNT; bIndex++) {
 		pinMode(myButtons[bIndex].getPin(), INPUT_PULLUP);
 		myButtons[bIndex].begin();
 	}
 }
 
 void myButtons_update() {
-	for (byte bIndex = 0; bIndex < myButtons_cbCount; bIndex++) {
+	for (byte bIndex = 0; bIndex < myButtons_COUNT; bIndex++) {
 		myButtons[bIndex].update();
 	}
 }
@@ -810,6 +843,9 @@ void myButton_onEvent(slight_ButtonInput *pInstance, uint8_t bEvent) {
 				case 7: {
 					// down
 				} break;
+				default: {
+
+				}
 			}
 
 		} break;
@@ -864,20 +900,26 @@ void printByteAsPercentValueAlignRight(Print &pOut, uint8_t bValue) {
 
 void displayFaderValues() {
 	// R00*G 1 BFF W50
-	for (uint8_t index = 0; index < fader_COUNT; index++) {
-		uint8_t xPos = index * 4;
+	for (uint8_t indexFader = 0; indexFader < fader_COUNT; indexFader++) {
+		uint8_t xPos = indexFader * 4;
 
 		lcd.setCursor(xPos, 1);
-		lcd.print(fader_names[index]);
+		lcd.print((char)fader_names[indexFader]);
 
 		lcd.setCursor(xPos+1, 1);
 		// lcd.print(iFader);
-		// printByteAlignRight(lcd, fader_value[index]);
-		printByteAsPercentValueAlignRight(lcd, fader_value[index]);
+		// printByteAlignRight(lcd, fader_value[indexFader]);
+		// printByteAsPercentValueAlignRight(lcd, fader_value[indexFader]);
+        // check for a active fixture
+		if(fixture_current > 0) {
+			printByteAsPercentValueAlignRight(lcd, fixture_values[fixture_current][indexFader]);
+		} else {
+			lcd.print(F("--"));
+		}
 
 		lcd.setCursor(xPos+3, 1);
 		// check if fader is live (= bit set)
-		if( (fader_value_live & (1 << index)) == 1) {
+		if( (fader_value_live & (1 << indexFader)) > 0) {
 			lcd.print(F(" "));
 		} else {
 			lcd.print(F("*"));
@@ -903,9 +945,9 @@ void displayFixture() {
 
 	for (uint8_t index = 0; index < fixture_COUNT; index++) {
 		uint8_t xPos2 = xPos + (index * 1);
-		lcd.setCursor(xPos2, 1);
+		lcd.setCursor(xPos2, 0);
 		// check if fixture is selected (= bit set)
-		if( (fixture_selected & (1 << index)) == 1) {
+		if( (fixture_selected & (1 << index)) > 0) {
 			lcd.print(index+1);
 		} else {
 			lcd.print(F(" "));
