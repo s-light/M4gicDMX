@@ -935,13 +935,20 @@ void displayFaderValues() {
 
 void displayFixture() {
 	// F2:1234
-	uint8_t xPos = 16-7;
+	uint8_t xPos = 16-(3+fixture_COUNT);
+
 	lcd.setCursor(xPos, 0);
-	lcd.print("F");
+	lcd.print(F("F"));
 	xPos = xPos +1;
+
 	lcd.setCursor(xPos, 0);
 	lcd.print(fixture_current);
 	xPos = xPos +1;
+
+	lcd.setCursor(xPos, 0);
+	lcd.print(F(":"));
+	xPos = xPos +1;
+
 	for (uint8_t index = 0; index < fixture_COUNT; index++) {
 		uint8_t xPos2 = xPos + (index * 1);
 		lcd.setCursor(xPos2, 0);
