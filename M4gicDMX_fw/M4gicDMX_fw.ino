@@ -14,7 +14,7 @@
 			http://www.mathertel.de
 		~ slight_ButtonInput
 			written by stefan krueger (s-light),
-				stefan@s-light.eu, http://s-light.eu, https://github.com/s-light/
+				github@s-light.eu, http://s-light.eu, https://github.com/s-light/
 			cc by sa, Apache License Version 2.0, MIT
 
 	written by vincent maurer (BrixFX),
@@ -154,6 +154,7 @@ char  sMenu_Command_Current[]		= "x:TestValue ";
 /**********************************************/
 /**  Output system                           **/
 /**********************************************/
+
 // DualWrite from pYro_65 read more at: http://forum.arduino.cc/index.php?topic=200975.0
 class DualWriter : public Print{
 	public:
@@ -289,7 +290,6 @@ const uint8_t fixture_COUNT = 3;
 uint8_t fixture_values[fixture_COUNT][fader_COUNT];
 uint8_t fixture_selected = B00000000;
 uint8_t fixture_current = 0;
-uint8_t fixture_ID_new = 0;
 // fixture_current == 0 means no fixture. we will start to count by 1.
 // this helps to get the special case of 'no fixture selected.'
 
@@ -753,6 +753,7 @@ void fixtureToggle(uint8_t fixtureID) {
 		fixture_selected = fixture_selected ^ (B00000001 << fixtureID);
 
 		// check if fixture is selected (= bit set)
+		uint8_t fixture_ID_new = 0;
 		if( (fixture_selected & (1 << fixtureID)) > 0) {
 			// move focus to this fixtureID:
 			fixture_ID_new = fixtureID+1;
@@ -906,6 +907,7 @@ void printByteAsPercentValueAlignRight(Print &pOut, uint8_t bValue) {
 
 
 void displayFaderValues() {
+
 	// R00*G 1 BFF W50
 	for (uint8_t indexFader = 0; indexFader < fader_COUNT; indexFader++) {
 		uint8_t xPos = indexFader * 4;
