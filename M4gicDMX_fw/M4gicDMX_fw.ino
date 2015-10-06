@@ -66,6 +66,8 @@
 
 #include <LiquidCrystal.h>
 
+#include <slight_LiquidCrystalDummy.h>
+
 #include <DMXSerial.h>
 
 #include <slight_ButtonInput.h>
@@ -131,6 +133,7 @@ const uint16_t cwDebugOut_LiveSign_UpdateInterval		= 1000; //ms
 
 boolean bDebugOut_LiveSign_Serial_Enabled	= 0;
 boolean bDebugOut_LiveSign_LED_Enabled		= 1;
+boolean bDebugOut_printDisplay_Serial_Enabled = 0;
 
 
 /************************************************/
@@ -262,7 +265,14 @@ slight_ButtonInput myButtons[myButtons_COUNT] = {
 /************************************************/
 
 // initialize the library with the numbers of the interface pins
-LiquidCrystal lcd(7, 8, 9, 10, 11, 12);
+// LiquidCrystal lcd(7, 8, 9, 10, 11, 12);
+LiquidCrystal lcd_raw(7, 8, 9, 10, 11, 12);
+
+/**********************************************/
+/**  Output system                           **/
+/**********************************************/
+
+LiquidCrystalDummy lcd(lcd_raw);
 
 /************************************************/
 /** fader                                      **/
@@ -396,6 +406,7 @@ void handleMenu_Main(Print &pOut, char *caCommand) {
 			pOut.println(F("\t 'i': sketch info"));
 			pOut.println(F("\t 'y': toggle DebugOut livesign print"));
 			pOut.println(F("\t 'Y': toggle DebugOut livesign LED"));
+			pOut.println(F("\t 'd': toggle DebugOut printDisplay Serial"));
 			pOut.println(F("\t 'x': tests"));
 			pOut.println();
 			pOut.println(F("\t 'A': Show 'HelloWorld' "));
@@ -421,6 +432,12 @@ void handleMenu_Main(Print &pOut, char *caCommand) {
 			pOut.print(F("\t bDebugOut_LiveSign_LED_Enabled:"));
 			pOut.println(bDebugOut_LiveSign_LED_Enabled);
 		} break;
+		case 'd': {
+			pOut.println(F("\t toggle DebugOut printDisplay Serial:"));
+			bDebugOut_printDisplay_Serial_Enabled = !bDebugOut_printDisplay_Serial_Enabled;
+			pOut.print(F("\t bDebugOut_printDisplay_Serial_Enabled:"));
+			pOut.println(bDebugOut_printDisplay_Serial_Enabled);
+		} break;
 		case 'x': {
 			// get state
 			pOut.println(F("__________"));
@@ -429,18 +446,22 @@ void handleMenu_Main(Print &pOut, char *caCommand) {
 			pOut.println(F("nothing to do."));
 
 			// uint16_t wTest = 65535;
-			uint16_t wTest = atoi(&caCommand[1]);
-			pOut.print(F("wTest: "));
-			pOut.print(wTest);
-			pOut.println();
+			// uint16_t wTest = atoi(&caCommand[1]);
+			// pOut.print(F("wTest: "));
+			// pOut.print(wTest);
+			// pOut.println();
+			//
+			// pOut.print(F("1: "));
+			// pOut.print((byte)wTest);
+			// pOut.println();
+			//
+			// pOut.print(F("2: "));
+			// pOut.print((byte)(wTest>>8));
+			// pOut.println();
+			//
+			// pOut.println();
 
-			pOut.print(F("1: "));
-			pOut.print((byte)wTest);
-			pOut.println();
-
-			pOut.print(F("2: "));
-			pOut.print((byte)(wTest>>8));
-			pOut.println();
+			lcd.printContent(pOut);
 
 			pOut.println();
 
@@ -1220,6 +1241,10 @@ void loop() {
 				Serial.print(F("ms;"));
 				Serial.print(F("  free RAM = "));
 				Serial.println(freeRam());
+			}
+
+			if ( bDebugOut_printDisplay_Serial_Enabled) {
+				lcd.printContent(Serial);
 			}
 
 			if ( bDebugOut_LiveSign_LED_Enabled ) {
