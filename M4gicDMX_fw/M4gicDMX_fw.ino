@@ -289,6 +289,7 @@ const uint8_t fixture_COUNT = 3;
 uint8_t fixture_values[fixture_COUNT][fader_COUNT];
 uint8_t fixture_selected = B00000000;
 uint8_t fixture_current = 0;
+uint8_t fixture_ID_new = 0;
 // fixture_current == 0 means no fixture. we will start to count by 1.
 // this helps to get the special case of 'no fixture selected.'
 
