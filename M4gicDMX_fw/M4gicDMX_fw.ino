@@ -324,45 +324,70 @@ int freeRam () {
 }
 
 
-void printBinary8(byte bIn)  {
+void printBinary8(Print &pOut, byte bIn)  {
 
 	for (unsigned int mask = 0b10000000; mask; mask >>= 1) {
 		// check if this bit is set
 		if (mask & bIn) {
-			Serial.print('1');
+			pOut.print('1');
 		}
 		else {
-			Serial.print('0');
+			pOut.print('0');
 		}
 	}
 }
 
-void printBinary12(uint16_t bIn)  {
+void printBinary12(Print &pOut, uint16_t bIn)  {
 	//                       B12345678   B12345678
 	//for (unsigned int mask = 0x8000; mask; mask >>= 1) {
 	for (unsigned int mask = 0b100000000000; mask; mask >>= 1) {
 		// check if this bit is set
 		if (mask & bIn) {
-			Serial.print('1');
+			pOut.print('1');
 		}
 		else {
-			Serial.print('0');
+			pOut.print('0');
 		}
 	}
 }
 
-void printBinary16(uint16_t wIn)  {
+void printBinary16(Print &pOut, uint16_t wIn)  {
 	for (unsigned int mask = 0b1000000000000000; mask; mask >>= 1) {
 	// check if this bit is set
 		if (mask & wIn) {
-			Serial.print('1');
+			pOut.print('1');
 		}
 		else {
-			Serial.print('0');
+			pOut.print('0');
 		}
 	}
 }
 
+
+
+void printuint8_tAlignRight(Print &pOut, uint8_t bValue) {
+	//uint8_t bOffset = 0;
+	if (bValue < 100) {
+		if (bValue < 10) {
+			//bOffset = 2;
+			pOut.print(F("  "));
+		} else {
+			//bOffset = 1;
+			pOut.print(F(" "));
+		}
+	}
+	pOut.print(bValue);
+}
+
+void printArray(Print &pOut, uint8_t *array, uint8_t bCount) {
+	pOut.print(F(" "));
+	uint8_t bIndex = 0;
+	printuint8_tAlignRight(pOut, array[bIndex]);
+	for(bIndex = 1; bIndex < bCount; bIndex++){
+		pOut.print(F(", "));
+		printuint8_tAlignRight(pOut, array[bIndex]);
+	}
+}
 
 
 /************************************************/
@@ -461,7 +486,8 @@ void handleMenu_Main(Print &pOut, char *caCommand) {
 			//
 			// pOut.println();
 
-			lcd.printContent(pOut);
+			printDebugOutFixtureFader(pOut);
+
 
 			pOut.println();
 
@@ -723,7 +749,11 @@ void faderRead(){
 
 void faderCheckLive(uint8_t faderID, uint8_t fixtureID) {
     if(fixtureID == fixture_current) {
-    	if(fixture_values[fixtureID][faderID] == fader_value[faderID]) {
+		//
+    	if(
+			(fader_value[faderID] >= fixture_values[fixtureID][faderID] +2) &&
+            (fader_value[faderID] <= fixture_values[fixtureID][faderID] -2)
+		) {
         	// set this fader live
 			fader_value_live = fader_value_live | (1 << faderID);
         }
@@ -1022,7 +1052,41 @@ void dmxUpdate() {
 /**                                              **/
 /**************************************************/
 
+void printDebugOutFixtureFader (Print &pOut) {
+	// print display content
+	lcd.printContent(pOut);
+	pOut.println();
 
+	// print fader infos
+	pOut.print(F("fader_value"));
+	printArray(pOut, fader_value, fader_COUNT);
+	pOut.println();
+
+	pOut.print(F("fader_value_live "));
+	printBinary8(pOut, fader_value_live);
+	pOut.println();
+
+	// print fader infos
+	pOut.println(F("fixture_values"));
+	// uint8_t *p_fixture_values = fixture_values;
+	uint8_t *p_fixture_values;
+	for(
+		uint8_t indexFixture = 0;
+		indexFixture < fixture_COUNT;
+		indexFixture++
+	){
+		p_fixture_values = fixture_values[indexFixture];
+		printArray(pOut, p_fixture_values, fader_COUNT);
+		pOut.println();
+	}
+
+	pOut.print(F("fixture_selected "));
+	printBinary8(pOut, fixture_selected);
+	pOut.println();
+
+	pOut.print(F("fixture_current "));
+	pOut.println(fixture_current);
+}
 
 
 
@@ -1244,7 +1308,8 @@ void loop() {
 			}
 
 			if ( bDebugOut_printDisplay_Serial_Enabled) {
-				lcd.printContent(Serial);
+				// lcd.printContent(Serial);
+				printDebugOutFixtureFader(Serial);
 			}
 
 			if ( bDebugOut_LiveSign_LED_Enabled ) {
