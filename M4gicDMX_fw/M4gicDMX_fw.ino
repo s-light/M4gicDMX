@@ -946,12 +946,10 @@ void faderCheckLive(uint8_t faderID, uint8_t fixtureID) {
 }
 
 void mapFader2Fixture() {
-	if(fader_value_dirty){
-	// if(fader_value_dirty || fixtures_dirty){
+	// if(fader_value_dirty){
+	if(fader_value_dirty || fixtures_dirty){
 
-		// Serial.println("mapFader2Fixture!!");
-		// Serial.print("fader_value_dirty ");
-		// Serial.println(fader_value_dirty);
+		Serial.println("mapFader2Fixture!!");
 
 	    for (uint8_t indexFixture = 0; indexFixture < fixture_COUNT; indexFixture++) {
 		    // check if fixture is selected
@@ -985,8 +983,6 @@ void fixtureSelectNext() {
 
 void fixtureToggle(uint8_t fixtureID) {
 	if (fixtureID < fixture_COUNT) {
-
-		// Serial.println("\t\t\tfixtureToggle");
 
 		// How do you set, clear and toggle a single bit in C/C++?
 		// http://stackoverflow.com/a/47990/574981
@@ -1271,17 +1267,23 @@ void displayFixture() {
 }
 
 void displayUpdate() {
+
+	boolean display_dirty = false;
+
 	if(fixtures_dirty) {
 		fixtures_dirty = false;
 		displayFixture();
+		display_dirty = true;
 	}
 
 	if(fader_value_dirty) {
 		fader_value_dirty = false;
 		displayFaderValues();
+		display_dirty = true;
 	}
 
-	if(fader_value_dirty) {
+	if(display_dirty) {
+		display_dirty = false;
 		printDebugOutFixtureFader(Serial);
 	}
 }
@@ -1351,13 +1353,6 @@ void printDebugOutFixtureFader (Print &pOut) {
 
 	pOut.print(F("fixture_current "));
 	pOut.println(fixture_current);
-
-
-	pOut.print(F("fader_value_dirty "));
-	pOut.println(fader_value_dirty);
-
-	pOut.print(F("fixtures_dirty "));
-	pOut.println(fixtures_dirty);
 }
 
 
