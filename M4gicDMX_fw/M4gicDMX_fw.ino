@@ -1185,12 +1185,12 @@ void displayFaderValues(uint8_t x,uint8_t y) {
 
 	// R00*G 1 BFF W50
 	for (uint8_t indexFader = 0; indexFader < fader_COUNT; indexFader++) {
-		x = x+(indexFader * 4);
+		uint8_t x1 = x+(indexFader * 4);
 
-		lcd.setCursor(x, y);
+		lcd.setCursor(x1, y);
 		lcd.print((char)fader_names[indexFader]);
 
-		lcd.setCursor(x+1, y);
+		lcd.setCursor(x1+1, y);
 		// lcd.print(iFader);
 		// printByteAlignRight(lcd, fader_value[indexFader]);
 		// printByteAsPercentValueAlignRight(lcd, fader_value[indexFader]);
@@ -1201,7 +1201,7 @@ void displayFaderValues(uint8_t x,uint8_t y) {
 			lcd.print(F("--"));
 		}
 
-		lcd.setCursor(x+3, y);
+		lcd.setCursor(x1+3, y);
 		// check if fader is live (= bit set)
 		if( (fader_value_live & (1 << indexFader)) > 0) {
 			lcd.print(F(" "));
