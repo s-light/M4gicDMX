@@ -1148,7 +1148,7 @@ void myEncoder_onEvent(slight_RotaryEncoder *pInstance, byte bEvent) {
 
 
 /************************************************/
-/** Display                                    **/
+/** Display-Helper                             **/
 /************************************************/
 
 void printByteAlignRight(Print &pOut, uint8_t bValue) {
@@ -1178,17 +1178,19 @@ void printByteAsPercentValueAlignRight(Print &pOut, uint8_t bValue) {
 	}
 }
 
-
-void displayFaderValues() {
+/************************************************/
+/** LCD-Menu Functions                         **/
+/************************************************/
+void displayFaderValues(uint8_t x,uint8_t y) {
 
 	// R00*G 1 BFF W50
 	for (uint8_t indexFader = 0; indexFader < fader_COUNT; indexFader++) {
-		uint8_t xPos = indexFader * 4;
+		x = x+(indexFader * 4);
 
-		lcd.setCursor(xPos, 1);
+		lcd.setCursor(x, y);
 		lcd.print((char)fader_names[indexFader]);
 
-		lcd.setCursor(xPos+1, 1);
+		lcd.setCursor(x+1, y);
 		// lcd.print(iFader);
 		// printByteAlignRight(lcd, fader_value[indexFader]);
 		// printByteAsPercentValueAlignRight(lcd, fader_value[indexFader]);
@@ -1199,7 +1201,7 @@ void displayFaderValues() {
 			lcd.print(F("--"));
 		}
 
-		lcd.setCursor(xPos+3, 1);
+		lcd.setCursor(x+3, y);
 		// check if fader is live (= bit set)
 		if( (fader_value_live & (1 << indexFader)) > 0) {
 			lcd.print(F(" "));
@@ -1209,25 +1211,25 @@ void displayFaderValues() {
 	}
 }
 
-void displayFixture() {
+void displayFixture(uint8_t x, uint8_t y) {
 	// F2:1234
-	uint8_t xPos = 16-(3+fixture_COUNT);
+	// x has to be maximum 16-(3+fixture_COUNT)
 
-	lcd.setCursor(xPos, 0);
+	lcd.setCursor(x, y);
 	lcd.print(F("F"));
-	xPos = xPos +1;
+	x = x +1;
 
-	lcd.setCursor(xPos, 0);
+	lcd.setCursor(x, y);
 	lcd.print(fixture_current);
-	xPos = xPos +1;
+	x = x +1;
 
-	lcd.setCursor(xPos, 0);
+	lcd.setCursor(x, y);
 	lcd.print(F(":"));
-	xPos = xPos +1;
+	x = x +1;
 
 	for (uint8_t index = 0; index < fixture_COUNT; index++) {
-		uint8_t xPos2 = xPos + (index * 1);
-		lcd.setCursor(xPos2, 0);
+		uint8_t x2 = x + (index * 1);
+		lcd.setCursor(x2, 0);
 		// check if fixture is selected (= bit set)
 		if( (fixture_selected & (1 << index)) > 0) {
 			lcd.print(index+1);
@@ -1238,9 +1240,13 @@ void displayFixture() {
 
 }
 
+/************************************************/
+/** LCD-Menu                                   **/
+/************************************************/
+
 void displayUpdate() {
-	displayFixture();
-	displayFaderValues();
+	displayFixture(10,0);
+	displayFaderValues(0,1);
 }
 
 /************************************************/
