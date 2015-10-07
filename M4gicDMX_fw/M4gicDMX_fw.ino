@@ -437,6 +437,7 @@ uint8_t fader_value[fader_COUNT] = {0,0,0,0};
 const uint8_t fader_names[fader_COUNT] = {'R', 'G', 'B', 'W'};
 uint8_t fader_value_live = B00000000;
 
+boolean fader_value_dirty = true;
 
 /**************************************************/
 /**  DMXSerial                                   **/
@@ -452,6 +453,8 @@ uint8_t fixture_selected = B00000000;
 uint8_t fixture_current = 0;
 // fixture_current == 0 means no fixture. we will start to count by 1.
 // this helps to get the special case of 'no fixture selected.'
+
+boolean fixtures_dirty = true;
 
 /************************************************/
 /** other things...                            **/
@@ -900,13 +903,26 @@ void faderRead(){
 	// 	fader_value[i] = map(iFader_raw, 0, 1023, 0, 255);
 	// }
 	for (uint8_t i = 0; i < fader_COUNT; i++) {
-		if (mapEncoder1ToFader && (i == mapEncoder1ToFader_number) ) {
-			// map counter to fader value
-			fader_value[i] = myEncoder1_counter;
+		// defaults to old value
+		uint8_t valueNew = fader_value[i];
+
+		// check for EncoderDebug Mode
+		if (mapEncoder1ToFader) {
+			if (mapEncoder1ToFader_number == i) {
+				// map counter to fader value
+				valueNew = myEncoder1_counter;
+			}
 		} else {
 			uint16_t iFader_raw =  analogRead(ciPin_Fader[i]);
-			fader_value[i] = map(iFader_raw, 0, 1023, 0, 255);
+			valueNew = map(iFader_raw, 0, 1023, 0, 255);
 		}
+
+		// check for new value
+		if (fader_value[i] != valueNew) {
+			fader_value_dirty = true;
+			fader_value[i] = valueNew;
+		}
+
 	}
 }
 
@@ -930,20 +946,29 @@ void faderCheckLive(uint8_t faderID, uint8_t fixtureID) {
 }
 
 void mapFader2Fixture() {
-    for (uint8_t indexFixture = 0; indexFixture < fixture_COUNT; indexFixture++) {
-	    // check if fixture is selected
-	    if( (fixture_selected & (1 << indexFixture)) > 0) {
-		    // update fixture values
-		    for (uint8_t indexFader = 0; indexFader < fader_COUNT; indexFader++) {
-			    if( (fader_value_live & (1 << indexFader)) > 0) {
-			    	fixture_values[indexFixture][indexFader] = fader_value[indexFader];
-			    } else {
-				    // first check fader values!!!
-				    faderCheckLive(indexFader, indexFixture);
-			    }
-		    }
-        }
-    }
+	if(fader_value_dirty){
+	// if(fader_value_dirty || fixtures_dirty){
+
+		// Serial.println("mapFader2Fixture!!");
+		// Serial.print("fader_value_dirty ");
+		// Serial.println(fader_value_dirty);
+
+	    for (uint8_t indexFixture = 0; indexFixture < fixture_COUNT; indexFixture++) {
+		    // check if fixture is selected
+		    if( (fixture_selected & (1 << indexFixture)) > 0) {
+			    // update fixture values
+			    for (uint8_t indexFader = 0; indexFader < fader_COUNT; indexFader++) {
+				    if( (fader_value_live & (1 << indexFader)) > 0) {
+				    	fixture_values[indexFixture][indexFader] = fader_value[indexFader];
+				    } else {
+					    // first check fader values!!!
+					    faderCheckLive(indexFader, indexFixture);
+				    }
+			    } // end for indexFader
+	        }
+    	} // end for indexFixture
+
+	}
 }
 
 void fixtureSelectNext() {
@@ -954,10 +979,15 @@ void fixtureSelectNext() {
 	}
 
 	fixture_current = newId;
+
+	fixtures_dirty = true;
 }
 
 void fixtureToggle(uint8_t fixtureID) {
 	if (fixtureID < fixture_COUNT) {
+
+		// Serial.println("\t\t\tfixtureToggle");
+
 		// How do you set, clear and toggle a single bit in C/C++?
 		// http://stackoverflow.com/a/47990/574981
 		// https://www.arduino.cc/en/Reference/BitwiseAnd
@@ -987,7 +1017,9 @@ void fixtureToggle(uint8_t fixtureID) {
 			// reset fader_value_live
 			Serial.println(F("reset fader_value_live"));
 			fader_value_live = B00000000;
+			fixtures_dirty = true;
 		}
+
 
 	}
 }
@@ -1181,7 +1213,7 @@ void printByteAsPercentValueAlignRight(Print &pOut, uint8_t bValue) {
 
 void displayFaderValues() {
 
-	// R00*G 1 BFF W50
+	// R00.G 1 BFF W50
 	for (uint8_t indexFader = 0; indexFader < fader_COUNT; indexFader++) {
 		uint8_t xPos = indexFader * 4;
 
@@ -1239,8 +1271,19 @@ void displayFixture() {
 }
 
 void displayUpdate() {
-	displayFixture();
-	displayFaderValues();
+	if(fixtures_dirty) {
+		fixtures_dirty = false;
+		displayFixture();
+	}
+
+	if(fader_value_dirty) {
+		fader_value_dirty = false;
+		displayFaderValues();
+	}
+
+	if(fader_value_dirty) {
+		printDebugOutFixtureFader(Serial);
+	}
 }
 
 /************************************************/
@@ -1308,6 +1351,13 @@ void printDebugOutFixtureFader (Print &pOut) {
 
 	pOut.print(F("fixture_current "));
 	pOut.println(fixture_current);
+
+
+	pOut.print(F("fader_value_dirty "));
+	pOut.println(fader_value_dirty);
+
+	pOut.print(F("fixtures_dirty "));
+	pOut.println(fixtures_dirty);
 }
 
 
