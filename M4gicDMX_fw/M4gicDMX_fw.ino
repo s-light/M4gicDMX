@@ -590,7 +590,7 @@ void handleMenu_Main(Print &pOut, char *caCommand) {
 			pOut.println();
 			pOut.println(F("\t 'a': set mapEncoder1ToFader_number 'a:0' "));
 			pOut.println(F("\t 'f': select next fixture 'f'"));
-			pOut.println(F("\t 'F': toggle fixture 'F0'..'F2'"));
+			pOut.println(F("\t 'F': toggle fixture 'F:1'..'F:3'"));
 			pOut.println();
 			pOut.println(F("\t 'set:' enter SubMenu1"));
 			pOut.println();
@@ -667,7 +667,7 @@ void handleMenu_Main(Print &pOut, char *caCommand) {
 		case 'F': {
 			pOut.print(F("\t toggle fixture "));
 
-			uint8_t bID = atoi(&caCommand[1]);
+			uint8_t bID = atoi(&caCommand[2]);
 
 			pOut.print(bID);
 			// pOut.print(F(" : "));
@@ -675,7 +675,7 @@ void handleMenu_Main(Print &pOut, char *caCommand) {
 			// pOut.print(wValue);
 			pOut.println();
 
-			fixtureToggle(bID);
+			fixtureToggle(bID-1);
 			// pOut.print(F("\t demo for parsing values --> finished."));
 		} break;
 		//--------------------------------------------------------------------------------
@@ -936,8 +936,8 @@ void faderCheckLive(uint8_t faderID, uint8_t fixtureID) {
     if(fixtureID == (fixture_current-1)) {
 		//
     	if(
-			(fader_value[faderID] >= fixture_values[fixtureID][faderID] +2) &&
-            (fader_value[faderID] <= fixture_values[fixtureID][faderID] -2)
+			(fader_value[faderID] <= fixture_values[fixtureID][faderID] +2) &&
+            (fader_value[faderID] >= fixture_values[fixtureID][faderID] -2)
 		) {
         	// set this fader live
 			fader_value_live = fader_value_live | (1 << faderID);
@@ -949,6 +949,7 @@ void mapFader2Fixture() {
 	// if(fader_value_dirty){
 	if(fader_value_dirty || fixtures_dirty){
 
+		Serial.println("__________________________________________");
 		Serial.println("mapFader2Fixture!!");
 
 	    for (uint8_t indexFixture = 0; indexFixture < fixture_COUNT; indexFixture++) {
