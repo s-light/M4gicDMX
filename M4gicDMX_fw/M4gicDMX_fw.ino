@@ -16,6 +16,10 @@
 			written by stefan krueger (s-light),
 				github@s-light.eu, http://s-light.eu, https://github.com/s-light/
 			cc by sa, Apache License Version 2.0, MIT
+		~ slight_RotaryEncoder
+			written by stefan krueger (s-light),
+				github@s-light.eu, http://s-light.eu, https://github.com/s-light/
+			cc by sa, Apache License Version 2.0, MIT
 
 	written by vincent maurer (BrixFX),
 		github@s-light.eu, https://github.com/brixfx/
@@ -72,6 +76,7 @@
 
 #include <slight_ButtonInput.h>
 
+#include <slight_RotaryEncoder.h>
 
 /**************************************************************************************************/
 /** info                                                                                         **/
@@ -119,6 +124,112 @@ void print_info(Print &pOut) {
 /**************************************************************************************************/
 /** definitions (gloabl)                                                                         **/
 /**************************************************************************************************/
+
+/************************************************/
+/**  helper functions                          **/
+/************************************************/
+
+// setup Timer1 for Atmega32U4
+void setupTimer1() {
+
+	/**
+	  *
+	  *
+	  *
+	  *  Table 14-5. Waveform Generation Mode Bit Description (Page 131 Atmel Atmega32U4 Datasheet)
+	  *  (1)
+	  *  Mode    WGMn3    WGMn2    WGMn1    WGMn0    Timer/Counter                      TOP        Update of    TOVn Flag
+	  *                   CTCn     PWMn1    PWMn0    Mode of Operation                             OCRn x at    Set on
+	  *   0        0        0        0        0      Normal                              0xFFFF    Immediate    MAX
+	  *   1        0        0        0        1      PWM, Phase Correct,  8-bit          0x00FF    TOP          BOTTOM
+	  *   2        0        0        1        0      PWM, Phase Correct,  9-bit          0x01FF    TOP          BOTTOM
+	  *   3        0        0        1        1      PWM, Phase Correct, 10-bit          0x03FF    TOP          BOTTOM
+	  *   4        0        1        0        0      CTC                                 OCRnA     Immediate    MAX
+	  *   5        0        1        0        1      Fast PWM,  8-bit                    0x00FF    TOP          TOP
+	  *   6        0        1        1        0      Fast PWM,  9-bit                    0x01FF    TOP          TOP
+	  *   7        0        1        1        1      Fast PWM, 10-bit                    0x03FF    TOP          TOP
+	  *   8        1        0        0        0      PWM, Phase and Frequency Correct    ICRn      BOTTOM       BOTTOM
+	  *   9        1        0        0        1      PWM, Phase and Frequency Correct    OCRnA     BOTTOM       BOTTOM
+	  *  10        1        0        1        0      PWM, Phase               Correct    ICRn      TOP          BOTTOM
+	  *  11        1        0        1        1      PWM, Phase               Correct    OCRnA     TOP          BOTTOM
+	  *  12        1        1        0        0      CTC                                 ICRn      Immediate    MAX
+	  *
+	  *
+	  *
+	  *
+	  **/
+
+	// clear Timer Counter Control Register A and B
+	TCCR1A = 0;
+	TCCR1B = 0;
+
+	// set to Timer Mode 4 (CTC = Clear Timer on Compare Match); Prescaler  /64
+
+	TCCR1A = (0 << WGM10)	// Waveform Generation Mode
+		   | (0 << WGM11)	// Waveform Generation Mode
+		   | (0 << COM1C0)	// Compare Output Mode channel C
+		   | (0 << COM1C1)	// Compare Output Mode channel C
+		   | (0 << COM1B0)	// Compare Output Mode channel B
+		   | (0 << COM1B1)	// Compare Output Mode channel B
+		   | (0 << COM1A0)	// Compare Output Mode channel A
+		   | (0 << COM1A1);	// Compare Output Mode channel A
+
+	TCCR1B = (0 << ICNC1)	// Input Capture Noise Canceler
+		   | (0 << ICES1)	// Input Capture Edge Select
+		   | (0 << 0    )	// Reserved.
+		   | (1 << WGM12)	// Waveform Generation Mode
+		   | (0 << WGM13)	// Waveform Generation Mode
+		   | (0 <<  CS12)	// CSn2 0 0 0 0 1 1 1 1
+		   | (1 <<  CS11)	// CSn1 0 0 1 1 0 0 1 1
+		   | (1 <<  CS10);	// CSn0 0 1 0 1 0 1 0 1
+	/**                             | | | | | | | | _2_1_0_
+	  *                             | | | | | | | *- 1 1 1 External clock source on Tn pin. Clock on rising edge
+	  *                             | | | | | | *--- 1 1 0 External clock source on Tn pin. Clock on falling edge
+	  *                             | | | | | *----- 1 0 1 clkI/O/1024 (From prescaler)
+	  *                             | | | | *------- 1 0 0 clkI/O/256 (From prescaler)
+	  *                             | | | *--------- 0 1 1 clkI/O/64 (From prescaler)
+	  *                             | | *----------- 0 1 0 clkI/O/8 (From prescaler)
+	  *                             | *------------- 0 0 1 clkI/O/1 (No prescaling)
+	  *                             *--------------- 0 0 0 No clock source. (Timer/Counter stopped)
+	  * Table 14-6. Clock Select Bit Description
+	  *
+	  **/
+
+	/* 16.9.2 Clear Timer on Compare Match (CTC) Mode
+		( = Mode4; infos based on Datasheet ATmega328 Paragraph 16.9.2  Page123f )
+		Interrupt on Compare A Match - time calculation:
+		fOCnA = 'fclk_I/O' / (2*N*(1+OCRnA))
+
+			fOCnA * (2*N*(1+OCRnA)) = 'fclk_I/O'		| * (2*N*(1+OCRnA))
+			(2*N*(1+OCRnA)) = 'fclk_I/O' / fOCnA		| / fOCnA
+			2*N*(1+OCRnA)  = ('fclk_I/O' / fOCnA)		| / (2*N)
+			1+OCRnA  = ('fclk_I/O' / fOCnA) / (2*N)	| -1
+			OCRnA  = (('fclk_I/O' / fOCnA) / (2*N) ) -1
+
+		'fclk_I/O' = 16MHz
+		N = 64
+		OCR1A = 249
+
+		fOCnA = 16MHz / (2*64*(1+249)) = 500Hz
+		--> 1000ms / 500 = 2ms
+
+
+		OCRnA = ((16MHz/500Hz) / (2*64)) -1
+		OCRnA = 249
+
+		OCRnA = ((16MHz/1000Hz) / (2*64)) -1
+		OCRnA = 124
+
+	*/
+
+	// Set TOP
+	OCR1A =  249;
+	// interrupt on Compare A Match
+	TIMSK1 = _BV (OCIE1A);
+
+}
+
+
 
 
 /************************************************/
@@ -211,7 +322,7 @@ const uint16_t cwButton_ClickSingle		=   50;
 const uint16_t cwButton_ClickLong		= 5000;
 const uint16_t cwButton_ClickDouble		=  300;
 
-const uint8_t myButtons_COUNT = 4;
+const uint8_t myButtons_COUNT = 3;
 slight_ButtonInput myButtons[myButtons_COUNT] = {
 	slight_ButtonInput(
 		0,
@@ -246,19 +357,58 @@ slight_ButtonInput myButtons[myButtons_COUNT] = {
 		cwButton_ClickLong,
 		cwButton_ClickDouble
 	),
-	slight_ButtonInput(
-		3,
-		3,
-		myButton_getInput,
-		myButton_onEvent,
-		cwButton_Debounce,
-		cwButton_HoldingDown,
-		cwButton_ClickSingle,
-		cwButton_ClickLong,
-		cwButton_ClickDouble
-	),
+	// slight_ButtonInput(
+	// 	3,
+	// 	3,
+	// 	myButton_getInput,
+	// 	myButton_onEvent,
+	// 	cwButton_Debounce,
+	// 	cwButton_HoldingDown,
+	// 	cwButton_ClickSingle,
+	// 	cwButton_ClickLong,
+	// 	cwButton_ClickDouble
+	// ),
 };
 
+
+/**************************************************/
+/**  slight Rotary Encoder                       **/
+/**************************************************/
+
+const byte bPin_Rotary_1_A =  2;	// PB4
+const byte bPin_Rotary_1_B =  3;	// PD6
+// const byte bPin_Rotary_2_A =  6;	// PD7
+// const byte bPin_Rotary_2_B =  4;	// PD4
+
+/* constructor
+slight_RotaryEncoder(
+	byte cbID_New,
+	byte cbPin_A_New,
+	byte cbPin_B_New,
+	byte cbPulsPerStep_New,
+	tcbfOnEvent cbfCallbackOnEvent_New
+);
+*/
+slight_RotaryEncoder myEncoder1(
+	0, // byte cbID_New,
+	bPin_Rotary_1_A, // byte cbPin_A_New,
+	bPin_Rotary_1_B, // byte cbPin_B_New,
+	2, // byte cbPulsPerStep_New,
+	myEncoder_onEvent // tcbfOnEvent cbfCallbackOnEvent_New
+);
+// slight_RotaryEncoder myEncoder2(
+// 	1, // byte cbID_New,
+// 	bPin_Rotary_2_A, // byte cbPin_A_New,
+// 	bPin_Rotary_2_B, // byte cbPin_B_New,
+// 	2, // byte cbPulsPerStep_New,
+// 	myCallback_onEvent // tcbfOnEvent cbfCallbackOnEvent_New
+// );
+
+uint8_t myEncoder1_counter = 100;
+uint16_t myEncoder2_counter = 1000;
+
+boolean mapEncoder1ToFader = false;
+uint8_t mapEncoder1ToFader_number = 0;
 
 /************************************************/
 /** Display                                    **/
@@ -269,7 +419,7 @@ slight_ButtonInput myButtons[myButtons_COUNT] = {
 LiquidCrystal lcd_raw(7, 8, 9, 10, 11, 12);
 
 /**********************************************/
-/**  Output system                           **/
+/** LCD Debugging                            **/
 /**********************************************/
 
 LiquidCrystalDummy lcd(lcd_raw);
@@ -308,9 +458,9 @@ uint8_t fixture_current = 0;
 /************************************************/
 
 
-/**************************************************************************************************/
-/** functions                                                                                    **/
-/**************************************************************************************************/
+/******************************************************************************/
+/** functions                                                                **/
+/******************************************************************************/
 
 /************************************************/
 /**  Debug things                              **/
@@ -432,9 +582,10 @@ void handleMenu_Main(Print &pOut, char *caCommand) {
 			pOut.println(F("\t 'y': toggle DebugOut livesign print"));
 			pOut.println(F("\t 'Y': toggle DebugOut livesign LED"));
 			pOut.println(F("\t 'd': toggle DebugOut printDisplay Serial"));
+			pOut.println(F("\t 'e': toggle encoder to fader mapping"));
 			pOut.println(F("\t 'x': tests"));
 			pOut.println();
-			pOut.println(F("\t 'A': Show 'HelloWorld' "));
+			pOut.println(F("\t 'a': set mapEncoder1ToFader_number 'a:0' "));
 			pOut.println(F("\t 'f': select next fixture 'f'"));
 			pOut.println(F("\t 'F': toggle fixture 'F0'..'F2'"));
 			pOut.println();
@@ -462,6 +613,12 @@ void handleMenu_Main(Print &pOut, char *caCommand) {
 			bDebugOut_printDisplay_Serial_Enabled = !bDebugOut_printDisplay_Serial_Enabled;
 			pOut.print(F("\t bDebugOut_printDisplay_Serial_Enabled:"));
 			pOut.println(bDebugOut_printDisplay_Serial_Enabled);
+		} break;
+		case 'e': {
+			pOut.println(F("\t toggle encoder to fader mapping:"));
+			mapEncoder1ToFader = !mapEncoder1ToFader;
+			pOut.print(F("\t mapEncoder1ToFader:"));
+			pOut.println(mapEncoder1ToFader);
 		} break;
 		case 'x': {
 			// get state
@@ -494,8 +651,11 @@ void handleMenu_Main(Print &pOut, char *caCommand) {
 			pOut.println(F("__________"));
 		} break;
 		//--------------------------------------------------------------------------------
-		case 'A': {
-			pOut.println(F("\t Hello World! :-)"));
+		case 'a': {
+			pOut.print(F("\t mapEncoder1ToFader_number:"));
+			mapEncoder1ToFader_number = atoi(&caCommand[2]);
+			pOut.println(mapEncoder1ToFader_number);
+
 		} break;
 		case 'f': {
 			pOut.println(F("\t select next fixture "));
@@ -735,9 +895,18 @@ void handle_SerialReceive() {
 /************************************************/
 
 void faderRead(){
+	// for (uint8_t i = 0; i < fader_COUNT; i++) {
+	// 	uint16_t iFader_raw =  analogRead(ciPin_Fader[i]);
+	// 	fader_value[i] = map(iFader_raw, 0, 1023, 0, 255);
+	// }
 	for (uint8_t i = 0; i < fader_COUNT; i++) {
-		uint16_t iFader_raw =  analogRead(ciPin_Fader[i]);
-		fader_value[i] = map(iFader_raw, 0, 1023, 0, 255);
+		if (mapEncoder1ToFader && (i == mapEncoder1ToFader_number) ) {
+			// map counter to fader value
+			fader_value[i] = myEncoder1_counter;
+		} else {
+			uint16_t iFader_raw =  analogRead(ciPin_Fader[i]);
+			fader_value[i] = map(iFader_raw, 0, 1023, 0, 255);
+		}
 	}
 }
 
@@ -748,7 +917,7 @@ void faderRead(){
 // }
 
 void faderCheckLive(uint8_t faderID, uint8_t fixtureID) {
-    if(fixtureID == fixture_current) {
+    if(fixtureID == (fixture_current-1)) {
 		//
     	if(
 			(fader_value[faderID] >= fixture_values[fixtureID][faderID] +2) &&
@@ -816,6 +985,7 @@ void fixtureToggle(uint8_t fixtureID) {
 		if(fixture_ID_new != fixture_current) {
 			fixture_current = fixture_ID_new;
 			// reset fader_value_live
+			Serial.println(F("reset fader_value_live"));
 			fader_value_live = B00000000;
 		}
 
@@ -924,6 +1094,58 @@ void myButton_onEvent(slight_ButtonInput *pInstance, uint8_t bEvent) {
 	} //end switch
 }
 
+/************************************************/
+/** rotary encoder                             **/
+/************************************************/
+
+void myEncoder_onEvent(slight_RotaryEncoder *pInstance, byte bEvent) {
+	// react on events:
+	switch (bEvent) {
+		// rotation
+		case slight_RotaryEncoder::event_Rotated : {
+			// get current data
+			int iTemp_Steps = (*pInstance).getSteps();
+			int iTemp_StepsAccelerated = (*pInstance).getStepsAccelerated();
+			byte bTemp_AccelerationFactor = (*pInstance).getAccelerationFactor();
+			// clear data
+			(*pInstance).resetData();
+
+			// do something with the data:
+			// Serial.print(F("Instance ID:"));
+			// Serial.println((*pInstance).getID());
+			//
+			// Serial.print(F("\t event: "));
+			// (*pInstance).printEvent(Serial, bEvent);
+			// Serial.println();
+			//
+			// Serial.print(F("\t steps: "));
+			// Serial.println(iTemp_Steps);
+			//
+			// Serial.print(F("\t steps accelerated: "));
+			// Serial.println(iTemp_StepsAccelerated);
+			//
+			// Serial.print(F("\t acceleration factor: "));
+			// Serial.println(bTemp_AccelerationFactor);
+			//
+			// Serial.print(F("\t counter: "));
+
+			switch ((*pInstance).getID()) {
+				case 0: {
+					myEncoder1_counter = myEncoder1_counter + iTemp_StepsAccelerated;
+					// Serial.println(myEncoder1_counter);
+				} break;
+				case 1: {
+					myEncoder2_counter = myEncoder2_counter + iTemp_StepsAccelerated;
+					// Serial.println(myEncoder2_counter);
+				} break;
+			} // end switch ID
+
+		} break;
+		// currently there are no other events fired.
+	} //end switch event
+}
+
+
 
 /************************************************/
 /** Display                                    **/
@@ -982,7 +1204,7 @@ void displayFaderValues() {
 		if( (fader_value_live & (1 << indexFader)) > 0) {
 			lcd.print(F(" "));
 		} else {
-			lcd.print(F("*"));
+			lcd.print(F("."));
 		}
 	}
 }
@@ -1048,9 +1270,9 @@ void dmxUpdate() {
 	dmxUpdateFixtureValues();
 }
 
-/**************************************************/
-/**                                              **/
-/**************************************************/
+//******************************************
+//
+//******************************************
 
 void printDebugOutFixtureFader (Print &pOut) {
 	// print display content
@@ -1091,9 +1313,9 @@ void printDebugOutFixtureFader (Print &pOut) {
 
 
 
-/****************************************************************************************************/
-/** Setup                                                                                          **/
-/****************************************************************************************************/
+/*****************************************************************************/
+/** Setup                                                                   **/
+/*****************************************************************************/
 void setup() {
 
 	/************************************************/
@@ -1203,6 +1425,38 @@ void setup() {
 		Serial.println(F("\t finished."));
 
 	/************************************************/
+	/** setup Timer1                               **/
+	/************************************************/
+
+		Serial.print(F("# Free RAM = "));
+		Serial.println(freeRam());
+
+		Serial.println(F("setup Timer1:"));{
+
+			//Serial.println(F("\t sub action"));
+			setupTimer1();
+		}
+		Serial.println(F("\t finished."));
+
+	/************************************************/
+	/** setup RotaryEncoders                       **/
+	/************************************************/
+
+		Serial.print(F("# Free RAM = "));
+		Serial.println(freeRam());
+
+		Serial.println(F("setup RotaryEncoders:"));{
+
+			Serial.println(F("\t myEncoder1.begin()"));
+			myEncoder1.begin();
+
+			// Serial.println(F("\t myEncoder2.begin()"));
+			// myEncoder2.begin();
+		}
+		Serial.println(F("\t finished."));
+
+
+	/************************************************/
 	/** initialize fixture array                   **/
 	/************************************************/
 
@@ -1241,6 +1495,22 @@ void setup() {
 } /** setup **/
 
 
+/*****************************************************************************/
+/** Interrupt Service Routin                                                **/
+/*****************************************************************************/
+ISR(TIMER1_COMPA_vect) {
+
+	// classic if / else logic
+	myEncoder1.updateClassic();
+	// myEncoder2.updateClassic();
+
+	// GrayCode style
+	// myEncoder1.updateGrayCode();
+	// myEncoder2.updateGrayCode();
+
+}
+
+
 /****************************************************************************************************/
 /** Main Loop                                                                                      **/
 /****************************************************************************************************/
@@ -1269,6 +1539,13 @@ void loop() {
 	/**************************************************/
 		// myButtonFixture.update();
 		myButtons_update();
+
+	/************************************************/
+	/** read rotary encoders                       **/
+	/************************************************/
+		// update event system
+		myEncoder1.update();
+		// myEncoder2.update();
 
 	/**************************************************/
 	/** update dispay                                **/
