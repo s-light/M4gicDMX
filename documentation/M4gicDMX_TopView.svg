@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 19.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Ebene_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 595.28 841.89" enable-background="new 0 0 595.28 841.89" xml:space="preserve">
+<font horiz-adv-x="1000">
+<!-- Copyright 1992, 1994, 1997, 2000, 2004 Adobe Systems Incorporated. All rights reserved. Myriad is either a registered trademark or a trademark of Adobe Systems Incorporated in the United States and/or other countries. -->
+<font-face font-family="MyriadPro-Regular" units-per-em="1000" underline-position="-100" underline-thickness="50"/>
+<missing-glyph horiz-adv-x="500" d="M0,0l500,0l0,700l-500,0M250,395l-170,255l340,0M280,350l170,255l0,-510M80,50l170,255l170,-255M50,605l170,-255l-170,-255z"/>
+<glyph unicode="B" horiz-adv-x="542" d="M76,2C105,-2 151,-6 211,-6C321,-6 397,14 444,57C478,90 501,134 501,192C501,292 426,345 362,361l0,2C433,389 476,446 476,511C476,564 455,604 420,630C378,664 322,679 235,679C174,679 114,673 76,665M163,606C177,609 200,612 240,612C328,612 388,581 388,502C388,437 334,389 242,389l-79,0M163,323l72,0C330,323 409,285 409,193C409,95 326,62 236,62C205,62 180,63 163,66z"/>
+<glyph unicode="G" horiz-adv-x="646" d="M589,354l-222,0l0,-70l137,0l0,-201C484,73 445,65 388,65C231,65 128,166 128,337C128,506 235,608 399,608C467,608 512,595 548,579l21,71C540,664 479,681 401,681C175,681 37,534 36,333C36,228 72,138 130,82C196,19 280,-7 382,-7C473,-7 550,16 589,30z"/>
+<glyph unicode="R" horiz-adv-x="538" d="M76,0l87,0l0,292l82,0C324,289 360,254 380,161C399,77 414,19 425,0l90,0C501,26 485,91 463,185C447,255 416,303 364,321l0,3C435,348 491,407 491,496C491,548 472,594 438,624C396,662 336,679 243,679C183,679 120,674 76,665M163,604C177,608 207,612 249,612C341,611 404,573 404,486C404,409 345,358 252,358l-89,0z"/>
+<glyph unicode="W" horiz-adv-x="846" d="M277,0l96,351C398,438 413,504 425,571l2,0C436,503 450,437 471,351l85,-351l91,0l191,674l-89,0l-89,-340C639,250 620,175 606,101l-2,0C594,172 576,252 557,332l-82,342l-91,0l-90,-340C271,247 250,167 239,100l-2,0C225,165 207,249 187,333l-80,341l-92,0l171,-674z"/>
+<glyph unicode="1" horiz-adv-x="513" d="M236,0l85,0l0,650l-75,0l-142,-76l17,-67l113,61l2,0z"/>
+<glyph unicode="3" horiz-adv-x="513" d="M42,33C74,12 138,-11 211,-11C367,-11 448,80 448,184C448,275 383,335 303,351l0,2C383,382 423,439 423,506C423,585 365,661 237,661C167,661 101,636 67,611l23,-64C118,567 168,590 220,590C301,590 334,544 334,492C334,415 253,382 189,382l-49,0l0,-66l49,0C274,316 356,277 357,186C358,132 323,60 210,60C149,60 91,85 66,101z"/>
+<glyph unicode="2" horiz-adv-x="513" d="M460,0l0,73l-292,0l0,2l52,48C357,255 444,352 444,472C444,565 385,661 245,661C170,661 106,633 61,595l28,-62C119,558 168,588 227,588C324,588 356,527 356,461C355,363 280,279 114,121l-69,-67l0,-54z"/>
+<glyph unicode="0" horiz-adv-x="513" d="M262,661C130,661 36,541 36,323C38,108 124,-11 251,-11C395,-11 477,111 477,332C477,539 399,661 262,661M257,593C348,593 389,488 389,328C389,162 346,57 256,57C176,57 124,153 124,322C124,499 180,593 257,593z"/>
+</font>
+
+	<font horiz-adv-x="2048">
+<!-- Lucida is a registered trademark of Bigelow &amp; Holmes Inc. -->
+<!-- Copyright: Copyright 2015 Adobe System Incorporated. All rights reserved. -->
+<font-face font-family="LucidaConsole" units-per-em="2048" underline-position="-205" underline-thickness="102"/>
+<missing-glyph horiz-adv-x="1234" d="M256,0l0,1280l722,0l0,-1280M320,64l594,0l0,1152l-594,0z"/>
+<glyph unicode=" " horiz-adv-x="1234"/>
+<glyph unicode="." horiz-adv-x="1234" d="M469,0l0,296l296,0l0,-296z"/>
+<glyph unicode="0" horiz-adv-x="1234" d="M617,-37C463,-37 340,33 249,174C157,315 111,504 111,741C111,978 157,1166 249,1307C340,1447 463,1517 617,1517C771,1517 894,1447 986,1307C1077,1166 1123,978 1123,741C1123,504 1077,315 986,174C894,33 771,-37 617,-37M617,111C814,111 913,321 913,741C913,1160 814,1369 617,1369C420,1369 321,1160 321,741C321,321 420,111 617,111z"/>
+<glyph unicode="1" horiz-adv-x="1234" d="M185,0l0,148l395,0l0,1151l-395,-89l0,122l592,185l0,-1369l395,0l0,-148z"/>
+<glyph unicode="3" horiz-adv-x="1234" d="M234,7l0,174C368,134 471,111 543,111C632,111 704,139 759,194C814,249 841,321 841,410C841,510 809,587 744,641C679,695 586,722 466,722l-96,0l0,142l57,0C514,864 578,870 619,881C659,892 696,913 729,946C782,998 808,1065 808,1147C808,1216 787,1270 745,1310C703,1349 646,1369 574,1369C473,1369 367,1342 255,1288l0,173C364,1499 474,1518 585,1518C717,1518 820,1488 895,1429C969,1369 1006,1286 1006,1180C1006,1015 917,891 739,808C947,737 1051,604 1051,410C1051,273 1005,165 913,84C820,3 696,-37 539,-37C442,-37 340,-22 234,7z"/>
+<glyph unicode="4" horiz-adv-x="1234" d="M728,0l0,395l-617,0l0,166l617,919l185,0l0,-937l197,0l0,-148l-197,0l0,-395M277,543l451,0l0,672z"/>
+<glyph unicode="9" horiz-adv-x="1234" d="M230,15l0,169C354,135 449,111 514,111C637,111 733,165 801,272C869,379 903,529 903,724C816,597 703,534 564,534C448,534 350,579 270,669C189,758 149,867 149,996C149,1147 193,1272 280,1370C367,1468 479,1517 614,1517C775,1517 897,1453 982,1326C1067,1198 1109,1013 1109,770C1109,525 1057,330 952,183C847,36 707,-37 533,-37C455,-37 354,-20 230,15M590,1369C517,1369 457,1338 410,1276C363,1214 340,1134 340,1036C340,928 365,841 415,775C465,709 530,676 611,676C692,676 756,705 805,763C854,821 878,898 878,995C878,1109 852,1200 800,1268C747,1335 677,1369 590,1369z"/>
+<glyph unicode=":" horiz-adv-x="1234" d="M469,790l0,296l296,0l0,-296M469,0l0,296l296,0l0,-296z"/>
+<glyph unicode="B" horiz-adv-x="1234" d="M185,0l0,1283l414,0C899,1283 1049,1184 1049,985C1049,909 1023,844 972,789C920,734 848,694 755,671C993,622 1112,509 1112,332C1112,231 1077,151 1007,94C962,56 910,31 852,19C794,6 701,0 572,0M382,728l69,0C716,728 849,802 849,950C849,1023 823,1072 772,1097C721,1122 621,1135 474,1135l-92,0M382,148l178,0C690,148 780,161 829,188C878,215 902,264 902,335C902,418 862,483 782,532C701,581 592,605 454,605l-72,0z"/>
+<glyph unicode="D" horiz-adv-x="1234" d="M130,0l0,1283l387,0C944,1283 1157,1078 1157,667C1157,477 1111,323 1018,206C960,132 889,79 804,48C719,16 605,0 464,0M327,148l99,0C614,148 748,185 828,260C907,335 947,460 947,636C947,815 911,943 839,1020C767,1097 647,1135 479,1135l-152,0z"/>
+<glyph unicode="F" horiz-adv-x="1234" d="M247,0l0,1283l913,0l0,-148l-716,0l0,-442l611,0l0,-148l-611,0l0,-545z"/>
+<glyph unicode="G" horiz-adv-x="1234" d="M1113,1256l0,-181C981,1136 858,1166 743,1166C610,1166 501,1117 416,1020C330,923 287,799 287,648C287,497 335,373 432,276C529,179 652,130 802,130C836,130 879,134 932,142l0,339l-241,0l0,148l438,0l0,-596C995,-10 868,-31 748,-31C549,-31 388,31 264,154C139,277 77,438 77,635C77,837 139,1001 263,1126C387,1251 549,1314 749,1314C862,1314 984,1295 1113,1256z"/>
+<glyph unicode="M" horiz-adv-x="1234" d="M94,0l0,1283l237,0l282,-790l2,0l277,790l247,0l0,-1283l-161,0l0,1101l-2,0l-289,-830l-166,0l-288,807l-2,0l0,-1078z"/>
+<glyph unicode="R" horiz-adv-x="1234" d="M184,0l0,1283l359,0C692,1283 796,1271 854,1246C978,1195 1040,1104 1040,974C1040,885 1018,810 973,751C928,691 854,635 749,584l454,-584l-239,0l-405,534l-178,0l0,-534M381,683l104,0C591,683 675,706 737,753C799,800 830,863 830,942C830,1016 807,1067 760,1094C713,1121 627,1135 502,1135l-121,0z"/>
+<glyph unicode="W" horiz-adv-x="1234" d="M207,0l-191,1283l168,0l156,-1066l3,0l185,795l190,0l182,-783l2,0l165,1054l150,0l-211,-1283l-214,0l-177,753l-2,0l-178,-753z"/>
+<glyph unicode="X" horiz-adv-x="1234" d="M11,0l503,653l-460,630l233,0l347,-475l367,475l192,0l-466,-602l492,-681l-234,0l-379,522l-403,-522z"/>
+<glyph unicode="c" horiz-adv-x="1234" d="M1103,35C986,-5 870,-25 754,-25C565,-25 419,24 317,123C214,222 163,362 163,543C163,721 214,860 315,960C416,1060 556,1110 736,1110C851,1110 966,1093 1083,1058l0,-165C954,939 845,962 754,962C635,962 542,925 475,850C407,775 373,673 373,543C373,412 409,309 482,235C554,160 654,123 781,123C876,123 984,145 1103,190z"/>
+<glyph unicode="g" horiz-adv-x="1234" d="M212,-363l21,166C351,-247 461,-272 562,-272C773,-272 878,-172 878,29l9,196C804,75 685,0 528,0C404,0 306,47 233,142C160,236 123,363 123,523C123,697 165,839 250,948C335,1057 445,1111 580,1111C686,1111 790,1061 893,962l0,124l185,0l0,-869C1078,76 1069,-29 1050,-100C1031,-171 996,-234 945,-289C863,-376 735,-420 560,-420C457,-420 341,-401 212,-363M881,385l0,427C792,912 701,962 606,962C520,962 453,925 405,850C357,775 333,671 333,536C333,422 354,333 396,269C438,204 497,172 572,172C689,172 792,243 881,385z"/>
+<glyph unicode="i" horiz-adv-x="1234" d="M568,0l0,938l-395,0l0,148l592,0l0,-1086M543,1332l0,247l247,0l0,-247z"/>
+</font>
+
+	<rect id="XMLID_40_" x="114.638" y="237.945" fill="#B17F4A" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="366" height="366"/>
+<rect id="XMLID_1_" x="207.259" y="259.518" fill="#36A9E1" stroke="#000000" stroke-miterlimit="10" width="184.252" height="42.52"/>
+<rect id="XMLID_2_" x="220.485" y="390.145" fill="#FFFFFF" stroke="#000000" stroke-miterlimit="10" width="14.173" height="170.079"/>
+<rect id="XMLID_3_" x="210.071" y="469.272" fill="#706F6F" stroke="#000000" stroke-miterlimit="10" width="35" height="23"/>
+<rect id="XMLID_5_" x="270.399" y="390.145" fill="#FFFFFF" stroke="#000000" stroke-miterlimit="10" width="14.173" height="170.079"/>
+<rect id="XMLID_4_" x="259.986" y="492.272" fill="#706F6F" stroke="#000000" stroke-miterlimit="10" width="35" height="23"/>
+<rect id="XMLID_7_" x="317.86" y="390.146" fill="#FFFFFF" stroke="#000000" stroke-miterlimit="10" width="14.173" height="170.079"/>
+<rect id="XMLID_6_" x="307.447" y="525.472" fill="#706F6F" stroke="#000000" stroke-miterlimit="10" width="35" height="23"/>
+<rect id="XMLID_9_" x="364.111" y="390.145" fill="#FFFFFF" stroke="#000000" stroke-miterlimit="10" width="14.173" height="170.079"/>
+<rect id="XMLID_8_" x="353.698" y="390.146" fill="#706F6F" stroke="#000000" stroke-miterlimit="10" width="35" height="23"/>
+<text id="XMLID_10_" transform="matrix(1 0 0 1 220.7347 373.924)" font-family="'MyriadPro-Regular'" font-size="25.4147px">R</text>
+<text id="XMLID_11_" transform="matrix(1 0 0 1 269.2768 373.9236)" font-family="'MyriadPro-Regular'" font-size="25.4147px">G</text>
+<text id="XMLID_12_" transform="matrix(1 0 0 1 318.0597 373.9243)" font-family="'MyriadPro-Regular'" font-size="25.4147px">B</text>
+<text id="XMLID_13_" transform="matrix(1 0 0 1 360.4476 373.9241)" font-family="'MyriadPro-Regular'" font-size="25.4147px">W</text>
+<text id="XMLID_14_" transform="matrix(1 0 0 1 209.721 276.0418)" font-family="'LucidaConsole'" font-size="17.8598px">M4gicDMX  F0:</text>
+<text id="XMLID_15_" transform="matrix(1 0 0 1 209.7209 294.7918)" font-family="'LucidaConsole'" font-size="17.8598px">R44.G34.B11.W90.</text>
+<rect id="XMLID_16_" x="159.304" y="399.997" fill="#706F6F" stroke="#000000" stroke-miterlimit="10" width="28.8" height="28.8"/>
+<circle id="XMLID_17_" fill="#3C3C3B" stroke="#000000" stroke-miterlimit="10" cx="173.705" cy="414.397" r="10.5"/>
+<circle id="XMLID_18_" fill="#E30613" cx="184.796" cy="425.489" r="1.575"/>
+<rect id="XMLID_21_" x="159.304" y="440.798" fill="#706F6F" stroke="#000000" stroke-miterlimit="10" width="28.8" height="28.8"/>
+<circle id="XMLID_20_" fill="#3C3C3B" stroke="#000000" stroke-miterlimit="10" cx="173.705" cy="455.198" r="10.5"/>
+<circle id="XMLID_19_" fill="#E30613" cx="184.796" cy="466.289" r="1.575"/>
+<rect id="XMLID_27_" x="159.304" y="480.772" fill="#706F6F" stroke="#000000" stroke-miterlimit="10" width="28.8" height="28.8"/>
+<circle id="XMLID_26_" fill="#3C3C3B" stroke="#000000" stroke-miterlimit="10" cx="173.705" cy="495.172" r="10.5"/>
+<circle id="XMLID_25_" fill="#E30613" cx="184.996" cy="506.653" r="1.575"/>
+<rect id="XMLID_24_" x="159.304" y="521.572" fill="#706F6F" stroke="#000000" stroke-miterlimit="10" width="28.8" height="28.8"/>
+<circle id="XMLID_23_" fill="#3C3C3B" stroke="#000000" stroke-miterlimit="10" cx="173.705" cy="535.972" r="10.5"/>
+<circle id="XMLID_22_" fill="#E30613" cx="184.996" cy="547.423" r="1.575"/>
+<rect id="XMLID_31_" x="416.971" y="399.997" fill="#706F6F" stroke="#000000" stroke-miterlimit="10" width="28.8" height="28.8"/>
+<circle id="XMLID_30_" fill="#3C3C3B" stroke="#000000" stroke-miterlimit="10" cx="431.371" cy="414.397" r="10.5"/>
+<rect id="XMLID_29_" x="416.971" y="521.572" fill="#706F6F" stroke="#000000" stroke-miterlimit="10" width="28.8" height="28.8"/>
+<circle id="XMLID_28_" fill="#3C3C3B" stroke="#000000" stroke-miterlimit="10" cx="431.371" cy="535.972" r="10.5"/>
+<circle id="XMLID_32_" fill="#706F6F" stroke="#000000" stroke-miterlimit="10" cx="431.371" cy="475.184" r="27.277"/>
+<circle id="XMLID_33_" fill="#3C3C3B" stroke="#000000" stroke-miterlimit="10" cx="431.371" cy="475.185" r="14.76"/>
+<circle id="XMLID_35_" fill="#E30613" cx="441.771" cy="425.489" r="1.575"/>
+<circle id="XMLID_34_" fill="#E30613" cx="441.971" cy="547.423" r="1.575"/>
+<text id="XMLID_36_" transform="matrix(1 0 0 1 139.3858 425.4891)" font-family="'MyriadPro-Regular'" font-size="25.4147px">1</text>
+<text id="XMLID_37_" transform="matrix(1 0 0 1 139.3858 464.7141)" font-family="'MyriadPro-Regular'" font-size="25.4147px">2</text>
+<text id="XMLID_38_" transform="matrix(1 0 0 1 139.3858 502.4603)" font-family="'MyriadPro-Regular'" font-size="25.4147px">3</text>
+<text id="XMLID_39_" transform="matrix(1 0 0 1 139.3856 545.8475)" font-family="'MyriadPro-Regular'" font-size="25.4147px">0</text>
+</svg>
