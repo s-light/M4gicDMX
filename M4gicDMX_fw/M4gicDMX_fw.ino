@@ -322,7 +322,7 @@ const uint16_t cwButton_ClickSingle		=   50;
 const uint16_t cwButton_ClickLong		= 5000;
 const uint16_t cwButton_ClickDouble		=  300;
 
-const uint8_t myButtons_COUNT = 3;
+const uint8_t myButtons_COUNT = 4;
 slight_ButtonInput myButtons[myButtons_COUNT] = {
 	slight_ButtonInput(
 		0,
@@ -349,6 +349,17 @@ slight_ButtonInput myButtons[myButtons_COUNT] = {
 	slight_ButtonInput(
 		2,
 		4,
+		myButton_getInput,
+		myButton_onEvent,
+		cwButton_Debounce,
+		cwButton_HoldingDown,
+		cwButton_ClickSingle,
+		cwButton_ClickLong,
+		cwButton_ClickDouble
+	),
+	slight_ButtonInput(
+		3,
+		2,
 		myButton_getInput,
 		myButton_onEvent,
 		cwButton_Debounce,
@@ -456,6 +467,12 @@ uint8_t fixture_current = 0;
 
 boolean fixtures_dirty = true;
 
+/************************************************/
+/** Menu                            **/
+/************************************************/
+bool welcomeScreen = true;
+uint8_t currentMenu = 0;
+uint8_t currentSbMenu = 0;
 /************************************************/
 /** other things...                            **/
 /************************************************/
@@ -1275,9 +1292,87 @@ void displayFixture(uint8_t x, uint8_t y) {
 /************************************************/
 /** LCD-Menu                                   **/
 /************************************************/
+// void displayUpdate() {
+// 	menuWelcome();
+// 	switch(currentMenu)
+// 		case 0:{
+// 			switch(currentSbMenu)
+// 				case 0:{
+// 						menuMain();
+//
+// 				}
+// 				case 1:{
+//
+//
+// 				}
+//
+// 		}
+// 		case 1:{
+// 			switch(currentSbMenu)
+// 				case 0:{
+//
+//
+// 				}
+// 				case 1:{
+//
+//
+// 				}
+//
+// 		}
+// 		case 2:{
+// 			switch(currentSbMenu)
+// 				case 0:{
+//
+//
+// 				}
+// 				case 1:{
+//
+//
+// 				}
+//
+// 		}
+//
+// }
+//
+// void menuWelcome(){
+// 	if(welcomeScreen){
+// 		lcd.setCursor(0,0);
+// 		lcd.print("  M4gicDMX by");
+// 		lcd.setCursor(0,1);
+// 		lcd.print("BrixFX & s-light");
+// 		delay(5000);
+// 		welcomeScreen = false;
+// 	}
+//
+// }
+//
+// void menuMain(){
+// 	lcd.setCursor(0,0);
+// 	lcd.print("M4gicDMX  ");
+// 	displayFixture(10,0);
+// 	displayFaderValues(0,1);
+// }
+//
+// void menuTest(){
+// 	lcd.setCursor(0,0);
+// 	lcd.print("Menu            ");
+// 	lcd.setCursor(0,1);
+// 	lcd.print("                ");
+// }
+//
+// void sbmenuTest(){
+// 	lcd.setCursor(0,0);
+// 	lcd.print("SubMenu         ");
+// 	lcd.setCursor(0,1);
+// 	lcd.print("                ");
+// }
+//
+
+
+
 
 void displayUpdate() {
-	if(fixtures_dirty) {
+	 if(fixtures_dirty) {
 		fixtures_dirty = false;
 		displayFixture(10,0);
 	}
@@ -1454,7 +1549,7 @@ void setup() {
 			Serial.println(F("\t init to 2x16"));
 			lcd.begin(16, 2);
 			// Print a message to the LCD.
-			lcd.print("M4gicDMX");
+
 		}
 		Serial.println(F("\t finished."));
 
