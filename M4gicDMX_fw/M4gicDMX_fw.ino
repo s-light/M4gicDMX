@@ -404,7 +404,7 @@ slight_RotaryEncoder myEncoder1(
 // 	myCallback_onEvent // tcbfOnEvent cbfCallbackOnEvent_New
 // );
 
-uint8_t myEncoder1_counter = 100;
+uint8_t myEncoder1_counter = 10;
 uint16_t myEncoder2_counter = 1000;
 
 boolean mapEncoder1ToFader = false;
@@ -1223,7 +1223,10 @@ void displayFaderValues() {
 		// printByteAsPercentValueAlignRight(lcd, fader_value[indexFader]);
         // check for a active fixture
 		if(fixture_current > 0) {
-			printByteAsPercentValueAlignRight(lcd, fixture_values[fixture_current][indexFader]);
+			printByteAsPercentValueAlignRight(
+				lcd,
+				fixture_values[fixture_current-1][indexFader]
+			);
 		} else {
 			lcd.print(F("--"));
 		}
