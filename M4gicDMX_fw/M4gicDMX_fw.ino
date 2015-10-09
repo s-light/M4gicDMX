@@ -360,7 +360,7 @@ slight_ButtonInput myButtons[myButtons_COUNT] = {
 	slight_ButtonInput(
 		// up
 		4,
-		A4,
+		3,
 		myButton_getInput,
 		myButton_onEvent,
 		cwButton_Debounce,
@@ -372,7 +372,7 @@ slight_ButtonInput myButtons[myButtons_COUNT] = {
 	slight_ButtonInput(
 		// down
 		4,
-		3,
+		A4,
 		myButton_getInput,
 		myButton_onEvent,
 		cwButton_Debounce,
@@ -384,7 +384,7 @@ slight_ButtonInput myButtons[myButtons_COUNT] = {
 		slight_ButtonInput(
 			// back
 			5,
-			A5,
+			2,
 			myButton_getInput,
 			myButton_onEvent,
 			cwButton_Debounce,
@@ -396,7 +396,7 @@ slight_ButtonInput myButtons[myButtons_COUNT] = {
 		slight_ButtonInput(
 			// enter
 			6,
-			2,
+			A5,
 			myButton_getInput,
 			myButton_onEvent,
 			cwButton_Debounce,
@@ -452,7 +452,7 @@ slight_RotaryEncoder myEncoder1(
 // 	myCallback_onEvent // tcbfOnEvent cbfCallbackOnEvent_New
 // );
 
-uint8_t myEncoder1_counter = 100;
+uint8_t myEncoder1_counter = 10;
 uint16_t myEncoder2_counter = 1000;
 
 boolean mapEncoder1ToFader = false;
@@ -471,6 +471,8 @@ LiquidCrystal lcd_raw(7, 8, 9, 10, 11, 12);
 /**********************************************/
 
 LiquidCrystalDummy lcd(lcd_raw);
+
+boolean bDebugOut_printDisplay_onChnage = 0;
 
 /************************************************/
 /** fader                                      **/
@@ -642,13 +644,14 @@ void handleMenu_Main(Print &pOut, char *caCommand) {
 			pOut.println(F("\t 'i': sketch info"));
 			pOut.println(F("\t 'y': toggle DebugOut livesign print"));
 			pOut.println(F("\t 'Y': toggle DebugOut livesign LED"));
-			pOut.println(F("\t 'd': toggle DebugOut printDisplay Serial"));
+			pOut.println(F("\t 'd': toggle DebugOut printDisplay livesign"));
+			pOut.println(F("\t 'D': toggle DebugOut printDisplay onChange"));
 			pOut.println(F("\t 'e': toggle encoder to fader mapping"));
 			pOut.println(F("\t 'x': tests"));
 			pOut.println();
 			pOut.println(F("\t 'a': set mapEncoder1ToFader_number 'a:0' "));
 			pOut.println(F("\t 'f': select next fixture 'f'"));
-			pOut.println(F("\t 'F': toggle fixture 'F0'..'F2'"));
+			pOut.println(F("\t 'F': toggle fixture 'F:1'..'F:3'"));
 			pOut.println();
 			pOut.println(F("\t 'set:' enter SubMenu1"));
 			pOut.println();
@@ -670,10 +673,16 @@ void handleMenu_Main(Print &pOut, char *caCommand) {
 			pOut.println(bDebugOut_LiveSign_LED_Enabled);
 		} break;
 		case 'd': {
-			pOut.println(F("\t toggle DebugOut printDisplay Serial:"));
+			pOut.println(F("\t toggle DebugOut printDisplay livesign:"));
 			bDebugOut_printDisplay_Serial_Enabled = !bDebugOut_printDisplay_Serial_Enabled;
 			pOut.print(F("\t bDebugOut_printDisplay_Serial_Enabled:"));
 			pOut.println(bDebugOut_printDisplay_Serial_Enabled);
+		} break;
+		case 'D': {
+			pOut.println(F("\t toggle DebugOut printDisplay onChange:"));
+			bDebugOut_printDisplay_onChnage = !bDebugOut_printDisplay_onChnage;
+			pOut.print(F("\t bDebugOut_printDisplay_onChnage:"));
+			pOut.println(bDebugOut_printDisplay_onChnage);
 		} break;
 		case 'e': {
 			pOut.println(F("\t toggle encoder to fader mapping:"));
@@ -725,7 +734,7 @@ void handleMenu_Main(Print &pOut, char *caCommand) {
 		case 'F': {
 			pOut.print(F("\t toggle fixture "));
 
-			uint8_t bID = atoi(&caCommand[1]);
+			uint8_t bID = atoi(&caCommand[2]);
 
 			pOut.print(bID);
 			// pOut.print(F(" : "));
@@ -733,7 +742,7 @@ void handleMenu_Main(Print &pOut, char *caCommand) {
 			// pOut.print(wValue);
 			pOut.println();
 
-			fixtureToggle(bID);
+			fixtureToggle(bID-1);
 			// pOut.print(F("\t demo for parsing values --> finished."));
 		} break;
 		//--------------------------------------------------------------------------------
@@ -994,8 +1003,8 @@ void faderCheckLive(uint8_t faderID, uint8_t fixtureID) {
     if(fixtureID == (fixture_current-1)) {
 		//
     	if(
-			(fader_value[faderID] >= fixture_values[fixtureID][faderID] +2) &&
-            (fader_value[faderID] <= fixture_values[fixtureID][faderID] -2)
+			(fader_value[faderID] <= fixture_values[fixtureID][faderID] +2) &&
+            (fader_value[faderID] >= fixture_values[fixtureID][faderID] -2)
 		) {
         	// set this fader live
 			fader_value_live = fader_value_live | (1 << faderID);
@@ -1004,12 +1013,11 @@ void faderCheckLive(uint8_t faderID, uint8_t fixtureID) {
 }
 
 void mapFader2Fixture() {
-	if(fader_value_dirty){
-	// if(fader_value_dirty || fixtures_dirty){
+	// if(fader_value_dirty){
+	if(fader_value_dirty || fixtures_dirty){
 
+		// Serial.println("__________________________________________");
 		// Serial.println("mapFader2Fixture!!");
-		// Serial.print("fader_value_dirty ");
-		// Serial.println(fader_value_dirty);
 
 	    for (uint8_t indexFixture = 0; indexFixture < fixture_COUNT; indexFixture++) {
 		    // check if fixture is selected
@@ -1043,8 +1051,6 @@ void fixtureSelectNext() {
 
 void fixtureToggle(uint8_t fixtureID) {
 	if (fixtureID < fixture_COUNT) {
-
-		// Serial.println("\t\t\tfixtureToggle");
 
 		// How do you set, clear and toggle a single bit in C/C++?
 		// http://stackoverflow.com/a/47990/574981
@@ -1155,20 +1161,24 @@ void myButton_onEvent(slight_ButtonInput *pInstance, uint8_t bEvent) {
 
 				case 4: {
 					// up
+					lcdClear();
 					currentMenu = lastMenu;
-					}
-
-				} break;
+					currentSbMenu = 0;
+				}	break;
 				case 5: {
 					// down
+					lcdClear();
 					currentMenu = nextMenu;
+					currentSbMenu = 0;
 				} break;
 				case 6: {
 					// back
+					lcdClear();
 					currentSbMenu = lastSbMenu;
 				} break;
 				case 7: {
 					// enter
+					lcdClear();
 					currentSbMenu = nextSbMenu;
 				} break;
 				default: {
@@ -1191,7 +1201,7 @@ void myButton_onEvent(slight_ButtonInput *pInstance, uint8_t bEvent) {
 			Serial.println((*pInstance).getClickCount());
 		} break;*/
 	} //end switch
-
+}
 
 /************************************************/
 /** rotary encoder                             **/
@@ -1295,7 +1305,10 @@ void displayFaderValues(uint8_t x,uint8_t y) {
 		// printByteAsPercentValueAlignRight(lcd, fader_value[indexFader]);
         // check for a active fixture
 		if(fixture_current > 0) {
-			printByteAsPercentValueAlignRight(lcd, fixture_values[fixture_current][indexFader]);
+			printByteAsPercentValueAlignRight(
+				lcd,
+				fixture_values[fixture_current-1][indexFader]
+			);
 		} else {
 			lcd.print(F("--"));
 		}
@@ -1339,6 +1352,13 @@ void displayFixture(uint8_t x, uint8_t y) {
 
 }
 
+void lcdClear(){
+	lcd.setCursor(0,0);
+	lcd.print("                ");
+	lcd.setCursor(0,1);
+	lcd.print("                ");
+
+}
 /************************************************/
 /** LCD-Menu                                   **/
 /************************************************/
@@ -1352,7 +1372,7 @@ void displayFixture(uint8_t x, uint8_t y) {
 			switch(currentSbMenu){
 				case 0:{
 					// 1. sub page
-					lastSbMenu = 1;
+					lastSbMenu = 2;
 					nextSbMenu = 1;
 					menuMain();
 					break;
@@ -1360,8 +1380,15 @@ void displayFixture(uint8_t x, uint8_t y) {
 				case 1:{
 					// 2. sub page
 					lastSbMenu = 0;
-					nextSbMenu = 0;
+					nextSbMenu = 2;
 					sbmenuTest("SubMenu 01      ");
+					break;
+				}
+				case 2:{
+					// 3. sub page
+					lastSbMenu = 1;
+					nextSbMenu = 0;
+					sbmenuTest("SubMenu 02      ");
 					break;
 				}
 
@@ -1369,12 +1396,12 @@ void displayFixture(uint8_t x, uint8_t y) {
 		}break;
 		case 1:{
 			// 2. Menu page
-			lastMenu = 1;
+			lastMenu = 0;
 			nextMenu = 2;
 			switch(currentSbMenu){
 				case 0:{
 					// 1. sub page
-					lastSbMenu = 1;
+					lastSbMenu = 2;
 					nextSbMenu = 1;
 					menuTest("MenuTest 1      ");
 					break;
@@ -1383,13 +1410,19 @@ void displayFixture(uint8_t x, uint8_t y) {
 				case 1:{
 					// 2. sub page
 					lastSbMenu = 0;
-					nextSbMenu = 0;
+					nextSbMenu = 2;
 					sbmenuTest("SubMenu 11      ");
 					break;
 				}
-				break;
+				case 2:{
+					// 3. sub page
+					lastSbMenu = 1;
+					nextSbMenu = 0;
+					sbmenuTest("SubMenu 12      ");
+					break;
+				}
 			}
-		}
+		}break;
 		case 2:{
 			// 3. Menu page
 			lastMenu = 1;
@@ -1397,7 +1430,7 @@ void displayFixture(uint8_t x, uint8_t y) {
 			switch(currentSbMenu){
 				case 0:{
 					// 1. sub page
-					lastSbMenu = 1;
+					lastSbMenu = 2;
 					nextSbMenu = 1;
 					menuTest("MenuTest 2      ");
 					break;
@@ -1405,11 +1438,17 @@ void displayFixture(uint8_t x, uint8_t y) {
 				case 1:{
 					// 2. sub page
 					lastSbMenu = 0;
-					nextSbMenu = 0;
+					nextSbMenu = 2;
 					sbmenuTest("SubMenu 21      ");
 					break;
 				}
-				break;
+				case 2:{
+					// 3. sub page
+					lastSbMenu = 1;
+					nextSbMenu = 0;
+					sbmenuTest("SubMenu 22      ");
+					break;
+				}
 			}
 		}
 		break;
@@ -1423,16 +1462,39 @@ void menuWelcome(){
 		lcd.setCursor(0,1);
 		lcd.print("BrixFX & s-light");
 		delay(5000);
+		lcdClear();
 		welcomeScreen = false;
 	}
-
 }
 
 void menuMain(){
 	lcd.setCursor(0,0);
-	lcd.print("M4gicDMX  ");
-	displayFixture(10,0);
-	displayFaderValues(0,1);
+	lcd.print("M4gicDMX");
+	boolean display_dirty = false;
+	boolean init = true;
+
+	if(init){
+		init = false;
+		displayFixture(10,0);
+		displayFaderValues(0,1);
+	}
+
+	if (fixtures_dirty) {
+		fixtures_dirty = false;
+		displayFixture(10,0);
+		display_dirty = true;
+	}
+
+	if (fader_value_dirty) {
+		fader_value_dirty = false;
+		displayFaderValues(0,1);
+		display_dirty = true;
+	}
+
+	if (display_dirty && bDebugOut_printDisplay_onChnage) {
+		display_dirty = false;
+		printDebugOutFixtureFader(Serial);
+	}
 }
 
 void menuTest(String txt){
@@ -1484,7 +1546,7 @@ void dmxUpdateFixtureValues() {
 	for (uint8_t indexFixture = 0; indexFixture < fixture_COUNT; indexFixture++) {
 		for (uint8_t indexCh = 0; indexCh < fader_COUNT; indexCh++) {
 			DMXSerial.write(
-				indexFixture + indexCh + 1,
+				(indexFixture*fader_COUNT) + indexCh + 1,
 				fixture_values[indexFixture][indexCh]
 			);
 		}
@@ -1534,13 +1596,6 @@ void printDebugOutFixtureFader (Print &pOut) {
 
 	pOut.print(F("fixture_current "));
 	pOut.println(fixture_current);
-
-
-	pOut.print(F("fader_value_dirty "));
-	pOut.println(fader_value_dirty);
-
-	pOut.print(F("fixtures_dirty "));
-	pOut.println(fixtures_dirty);
 }
 
 
