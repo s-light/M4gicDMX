@@ -322,7 +322,7 @@ const uint16_t cwButton_ClickSingle		=   50;
 const uint16_t cwButton_ClickLong		= 5000;
 const uint16_t cwButton_ClickDouble		=  300;
 
-const uint8_t myButtons_COUNT = 4;
+const uint8_t myButtons_COUNT = 7;
 slight_ButtonInput myButtons[myButtons_COUNT] = {
 	slight_ButtonInput(
 		0,
@@ -358,8 +358,9 @@ slight_ButtonInput myButtons[myButtons_COUNT] = {
 		cwButton_ClickDouble
 	),
 	slight_ButtonInput(
-		3,
-		2,
+		// up
+		4,
+		A4,
 		myButton_getInput,
 		myButton_onEvent,
 		cwButton_Debounce,
@@ -367,6 +368,42 @@ slight_ButtonInput myButtons[myButtons_COUNT] = {
 		cwButton_ClickSingle,
 		cwButton_ClickLong,
 		cwButton_ClickDouble
+	),
+	slight_ButtonInput(
+		// down
+		4,
+		3,
+		myButton_getInput,
+		myButton_onEvent,
+		cwButton_Debounce,
+		cwButton_HoldingDown,
+		cwButton_ClickSingle,
+		cwButton_ClickLong,
+		cwButton_ClickDouble
+	),
+		slight_ButtonInput(
+			// back
+			5,
+			A5,
+			myButton_getInput,
+			myButton_onEvent,
+			cwButton_Debounce,
+			cwButton_HoldingDown,
+			cwButton_ClickSingle,
+			cwButton_ClickLong,
+			cwButton_ClickDouble
+	),
+		slight_ButtonInput(
+			// enter
+			6,
+			2,
+			myButton_getInput,
+			myButton_onEvent,
+			cwButton_Debounce,
+			cwButton_HoldingDown,
+			cwButton_ClickSingle,
+			cwButton_ClickLong,
+			cwButton_ClickDouble
 	),
 	// slight_ButtonInput(
 	// 	3,
@@ -473,6 +510,10 @@ boolean fixtures_dirty = true;
 bool welcomeScreen = true;
 uint8_t currentMenu = 0;
 uint8_t currentSbMenu = 0;
+uint8_t nextMenu = 1;
+uint8_t nextSbMenu = 1;
+uint8_t lastMenu = 3;
+uint8_t lastSbMenu = 2;
 /************************************************/
 /** other things...                            **/
 /************************************************/
@@ -1104,29 +1145,38 @@ void myButton_onEvent(slight_ButtonInput *pInstance, uint8_t bEvent) {
 				// toggle fixtures
 				case 0:
 				case 1:
-				case 2:
-				case 3: {
+				case 2:{
 					fixtureToggle(bButtonIndex);
+				}break;
+				case 3: {
+
 				} break;
 				// menu
+
 				case 4: {
-					// enter
+					// up
+					currentMenu = lastMenu;
+					}
+
 				} break;
 				case 5: {
-					// back
+					// down
+					currentMenu = nextMenu;
 				} break;
 				case 6: {
-					// up
+					// back
+					currentSbMenu = lastSbMenu;
 				} break;
 				case 7: {
-					// down
+					// enter
+					currentSbMenu = nextSbMenu;
 				} break;
 				default: {
 
 				}
 			}
 
-		} break;
+		}
 		// case slight_ButtonInput::event_ClickLong : {
 		// 	Serial.println(F("click long"));
 		// } break;
@@ -1141,7 +1191,7 @@ void myButton_onEvent(slight_ButtonInput *pInstance, uint8_t bEvent) {
 			Serial.println((*pInstance).getClickCount());
 		} break;*/
 	} //end switch
-}
+
 
 /************************************************/
 /** rotary encoder                             **/
@@ -1292,100 +1342,132 @@ void displayFixture(uint8_t x, uint8_t y) {
 /************************************************/
 /** LCD-Menu                                   **/
 /************************************************/
+ void displayUpdate() {
+ 	menuWelcome();
+ 	switch(currentMenu){
+		case 0:{
+			// 1.Menu page
+			lastMenu = 2;
+			nextMenu = 1;
+			switch(currentSbMenu){
+				case 0:{
+					// 1. sub page
+					lastSbMenu = 1;
+					nextSbMenu = 1;
+					menuMain();
+					break;
+				}
+				case 1:{
+					// 2. sub page
+					lastSbMenu = 0;
+					nextSbMenu = 0;
+					sbmenuTest("SubMenu 01      ");
+					break;
+				}
+
+			}
+		}break;
+		case 1:{
+			// 2. Menu page
+			lastMenu = 1;
+			nextMenu = 2;
+			switch(currentSbMenu){
+				case 0:{
+					// 1. sub page
+					lastSbMenu = 1;
+					nextSbMenu = 1;
+					menuTest("MenuTest 1      ");
+					break;
+				}
+
+				case 1:{
+					// 2. sub page
+					lastSbMenu = 0;
+					nextSbMenu = 0;
+					sbmenuTest("SubMenu 11      ");
+					break;
+				}
+				break;
+			}
+		}
+		case 2:{
+			// 3. Menu page
+			lastMenu = 1;
+			nextMenu = 0;
+			switch(currentSbMenu){
+				case 0:{
+					// 1. sub page
+					lastSbMenu = 1;
+					nextSbMenu = 1;
+					menuTest("MenuTest 2      ");
+					break;
+				}
+				case 1:{
+					// 2. sub page
+					lastSbMenu = 0;
+					nextSbMenu = 0;
+					sbmenuTest("SubMenu 21      ");
+					break;
+				}
+				break;
+			}
+		}
+		break;
+}
+}
+
+void menuWelcome(){
+	if(welcomeScreen){
+		lcd.setCursor(0,0);
+		lcd.print("  M4gicDMX by");
+		lcd.setCursor(0,1);
+		lcd.print("BrixFX & s-light");
+		delay(5000);
+		welcomeScreen = false;
+	}
+
+}
+
+void menuMain(){
+	lcd.setCursor(0,0);
+	lcd.print("M4gicDMX  ");
+	displayFixture(10,0);
+	displayFaderValues(0,1);
+}
+
+void menuTest(String txt){
+	lcd.setCursor(0,0);
+	lcd.print(txt);
+	lcd.setCursor(0,1);
+	lcd.print("                ");
+}
+
+void sbmenuTest(String txt){
+	lcd.setCursor(0,0);
+	lcd.print(txt);
+	lcd.setCursor(0,1);
+	lcd.print("                ");
+ }
+
+
+
+
+
 // void displayUpdate() {
-// 	menuWelcome();
-// 	switch(currentMenu)
-// 		case 0:{
-// 			switch(currentSbMenu)
-// 				case 0:{
-// 						menuMain();
-//
-// 				}
-// 				case 1:{
-//
-//
-// 				}
-//
-// 		}
-// 		case 1:{
-// 			switch(currentSbMenu)
-// 				case 0:{
-//
-//
-// 				}
-// 				case 1:{
-//
-//
-// 				}
-//
-// 		}
-// 		case 2:{
-// 			switch(currentSbMenu)
-// 				case 0:{
-//
-//
-// 				}
-// 				case 1:{
-//
-//
-// 				}
-//
-// 		}
-//
-// }
-//
-// void menuWelcome(){
-// 	if(welcomeScreen){
-// 		lcd.setCursor(0,0);
-// 		lcd.print("  M4gicDMX by");
-// 		lcd.setCursor(0,1);
-// 		lcd.print("BrixFX & s-light");
-// 		delay(5000);
-// 		welcomeScreen = false;
+// 	 if(fixtures_dirty) {
+// 		fixtures_dirty = false;
+// 		displayFixture(10,0);
 // 	}
 //
-// }
+// 	if(fader_value_dirty) {
+// 		fader_value_dirty = false;
+// 		displayFaderValues(0,1);
+// 	}
 //
-// void menuMain(){
-// 	lcd.setCursor(0,0);
-// 	lcd.print("M4gicDMX  ");
-// 	displayFixture(10,0);
-// 	displayFaderValues(0,1);
-// }
-//
-// void menuTest(){
-// 	lcd.setCursor(0,0);
-// 	lcd.print("Menu            ");
-// 	lcd.setCursor(0,1);
-// 	lcd.print("                ");
-// }
-//
-// void sbmenuTest(){
-// 	lcd.setCursor(0,0);
-// 	lcd.print("SubMenu         ");
-// 	lcd.setCursor(0,1);
-// 	lcd.print("                ");
-// }
-//
-
-
-
-
-void displayUpdate() {
-	 if(fixtures_dirty) {
-		fixtures_dirty = false;
-		displayFixture(10,0);
-	}
-
-	if(fader_value_dirty) {
-		fader_value_dirty = false;
-		displayFaderValues(0,1);
-	}
-
-	if(fader_value_dirty) {
-		printDebugOutFixtureFader(Serial);
-	}
-}
+// 	if(fader_value_dirty) {
+// 		printDebugOutFixtureFader(Serial);
+// 	}
+//}
 
 /************************************************/
 /** DMX handling                               **/
