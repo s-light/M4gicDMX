@@ -424,6 +424,8 @@ LiquidCrystal lcd_raw(7, 8, 9, 10, 11, 12);
 
 LiquidCrystalDummy lcd(lcd_raw);
 
+boolean bDebugOut_printDisplay_onChnage = 0;
+
 /************************************************/
 /** fader                                      **/
 /************************************************/
@@ -584,7 +586,8 @@ void handleMenu_Main(Print &pOut, char *caCommand) {
 			pOut.println(F("\t 'i': sketch info"));
 			pOut.println(F("\t 'y': toggle DebugOut livesign print"));
 			pOut.println(F("\t 'Y': toggle DebugOut livesign LED"));
-			pOut.println(F("\t 'd': toggle DebugOut printDisplay Serial"));
+			pOut.println(F("\t 'd': toggle DebugOut printDisplay livesign"));
+			pOut.println(F("\t 'D': toggle DebugOut printDisplay onChange"));
 			pOut.println(F("\t 'e': toggle encoder to fader mapping"));
 			pOut.println(F("\t 'x': tests"));
 			pOut.println();
@@ -612,10 +615,16 @@ void handleMenu_Main(Print &pOut, char *caCommand) {
 			pOut.println(bDebugOut_LiveSign_LED_Enabled);
 		} break;
 		case 'd': {
-			pOut.println(F("\t toggle DebugOut printDisplay Serial:"));
+			pOut.println(F("\t toggle DebugOut printDisplay livesign:"));
 			bDebugOut_printDisplay_Serial_Enabled = !bDebugOut_printDisplay_Serial_Enabled;
 			pOut.print(F("\t bDebugOut_printDisplay_Serial_Enabled:"));
 			pOut.println(bDebugOut_printDisplay_Serial_Enabled);
+		} break;
+		case 'D': {
+			pOut.println(F("\t toggle DebugOut printDisplay onChange:"));
+			bDebugOut_printDisplay_onChnage = !bDebugOut_printDisplay_onChnage;
+			pOut.print(F("\t bDebugOut_printDisplay_onChnage:"));
+			pOut.println(bDebugOut_printDisplay_onChnage);
 		} break;
 		case 'e': {
 			pOut.println(F("\t toggle encoder to fader mapping:"));
@@ -949,8 +958,8 @@ void mapFader2Fixture() {
 	// if(fader_value_dirty){
 	if(fader_value_dirty || fixtures_dirty){
 
-		Serial.println("__________________________________________");
-		Serial.println("mapFader2Fixture!!");
+		// Serial.println("__________________________________________");
+		// Serial.println("mapFader2Fixture!!");
 
 	    for (uint8_t indexFixture = 0; indexFixture < fixture_COUNT; indexFixture++) {
 		    // check if fixture is selected
@@ -1274,19 +1283,19 @@ void displayUpdate() {
 
 	boolean display_dirty = false;
 
-	if(fixtures_dirty) {
+	if (fixtures_dirty) {
 		fixtures_dirty = false;
 		displayFixture();
 		display_dirty = true;
 	}
 
-	if(fader_value_dirty) {
+	if (fader_value_dirty) {
 		fader_value_dirty = false;
 		displayFaderValues();
 		display_dirty = true;
 	}
 
-	if(display_dirty) {
+	if (display_dirty && bDebugOut_printDisplay_onChnage) {
 		display_dirty = false;
 		printDebugOutFixtureFader(Serial);
 	}
@@ -1307,7 +1316,7 @@ void dmxUpdateFixtureValues() {
 	for (uint8_t indexFixture = 0; indexFixture < fixture_COUNT; indexFixture++) {
 		for (uint8_t indexCh = 0; indexCh < fader_COUNT; indexCh++) {
 			DMXSerial.write(
-				indexFixture + indexCh + 1,
+				(indexFixture*fader_COUNT) + indexCh + 1,
 				fixture_values[indexFixture][indexCh]
 			);
 		}
