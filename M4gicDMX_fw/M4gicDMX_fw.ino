@@ -1357,7 +1357,10 @@ void lcdClear(){
 	lcd.print("                ");
 	lcd.setCursor(0,1);
 	lcd.print("                ");
+}
 
+void ledDmx(){
+	analogWrite(13, fixture_values[0][3]);
 }
 /************************************************/
 /** LCD-Menu                                   **/
@@ -1495,6 +1498,7 @@ void menuMain(){
 		display_dirty = false;
 		printDebugOutFixtureFader(Serial);
 	}
+	ledDmx();
 }
 
 void menuTest(String txt){
