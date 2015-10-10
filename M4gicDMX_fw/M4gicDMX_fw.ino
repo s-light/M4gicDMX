@@ -371,7 +371,7 @@ slight_ButtonInput myButtons[myButtons_COUNT] = {
 	),
 	slight_ButtonInput(
 		// down
-		4,
+		5,
 		A4,
 		myButton_getInput,
 		myButton_onEvent,
@@ -383,8 +383,8 @@ slight_ButtonInput myButtons[myButtons_COUNT] = {
 	),
 		slight_ButtonInput(
 			// back
-			5,
-			2,
+			6,
+			A5,
 			myButton_getInput,
 			myButton_onEvent,
 			cwButton_Debounce,
@@ -395,8 +395,8 @@ slight_ButtonInput myButtons[myButtons_COUNT] = {
 	),
 		slight_ButtonInput(
 			// enter
-			6,
-			A5,
+			7,
+			2,
 			myButton_getInput,
 			myButton_onEvent,
 			cwButton_Debounce,
