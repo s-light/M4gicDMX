@@ -510,12 +510,12 @@ boolean fixtures_dirty = true;
 /** Menu                            **/
 /************************************************/
 bool welcomeScreen = true;
-uint8_t currentMenu = 0;
-uint8_t currentSbMenu = 0;
-uint8_t nextMenu = 1;
-uint8_t nextSbMenu = 1;
-uint8_t lastMenu = 3;
-uint8_t lastSbMenu = 2;
+uint8_t menuCurrent = 0;
+uint8_t sbMenuCurrent = 0;
+uint8_t menuNext = 1;
+uint8_t sbMenuNext = 1;
+uint8_t menuLast = 3;
+uint8_t sbMenuLast = 2;
 /************************************************/
 /** other things...                            **/
 /************************************************/
@@ -1162,24 +1162,24 @@ void myButton_onEvent(slight_ButtonInput *pInstance, uint8_t bEvent) {
 				case 4: {
 					// up
 					lcdClear();
-					currentMenu = lastMenu;
-					currentSbMenu = 0;
+					menuCurrent = menuLast;
+					sbMenuCurrent = 0;
 				}	break;
 				case 5: {
 					// down
 					lcdClear();
-					currentMenu = nextMenu;
-					currentSbMenu = 0;
+					menuCurrent = menuNext;
+					sbMenuCurrent = 0;
 				} break;
 				case 6: {
 					// back
 					lcdClear();
-					currentSbMenu = lastSbMenu;
+					sbMenuCurrent = sbMenuLast;
 				} break;
 				case 7: {
 					// enter
 					lcdClear();
-					currentSbMenu = nextSbMenu;
+					sbMenuCurrent = sbMenuNext;
 				} break;
 				default: {
 
@@ -1367,30 +1367,30 @@ void ledDmx(){
 /************************************************/
  void displayUpdate() {
  	menuWelcome();
- 	switch(currentMenu){
+ 	switch(menuCurrent){
 		case 0:{
 			// 1.Menu page
-			lastMenu = 2;
-			nextMenu = 1;
-			switch(currentSbMenu){
+			menuLast = 2;
+			menuNext = 1;
+			switch(sbMenuCurrent){
 				case 0:{
 					// 1. sub page
-					lastSbMenu = 2;
-					nextSbMenu = 1;
+					sbMenuLast = 2;
+					sbMenuNext = 1;
 					menuMain();
 					break;
 				}
 				case 1:{
 					// 2. sub page
-					lastSbMenu = 0;
-					nextSbMenu = 2;
+					sbMenuLast = 0;
+					sbMenuNext = 2;
 					sbmenuTest("SubMenu 01      ");
 					break;
 				}
 				case 2:{
 					// 3. sub page
-					lastSbMenu = 1;
-					nextSbMenu = 0;
+					sbMenuLast = 1;
+					sbMenuNext = 0;
 					sbmenuTest("SubMenu 02      ");
 					break;
 				}
@@ -1399,63 +1399,56 @@ void ledDmx(){
 		}break;
 		case 1:{
 			// 2. Menu page
-			lastMenu = 0;
-			nextMenu = 2;
-			switch(currentSbMenu){
+			menuLast = 0;
+			menuNext = 2;
+			switch(sbMenuCurrent){
 				case 0:{
 					// 1. sub page
-					lastSbMenu = 2;
-					nextSbMenu = 1;
+					sbMenuLast = 2;
+					sbMenuNext = 1;
 					menuTest("MenuTest 1      ");
-					break;
 				}
-
 				case 1:{
 					// 2. sub page
-					lastSbMenu = 0;
-					nextSbMenu = 2;
+					sbMenuLast = 0;
+					sbMenuNext = 2;
 					sbmenuTest("SubMenu 11      ");
-					break;
-				}
+				}break;
 				case 2:{
 					// 3. sub page
-					lastSbMenu = 1;
-					nextSbMenu = 0;
+					sbMenuLast = 1;
+					sbMenuNext = 0;
 					sbmenuTest("SubMenu 12      ");
-					break;
-				}
+				}break;
 			}
 		}break;
 		case 2:{
 			// 3. Menu page
-			lastMenu = 1;
-			nextMenu = 0;
-			switch(currentSbMenu){
+			menuLast = 1;
+			menuNext = 0;
+			switch(sbMenuCurrent){
 				case 0:{
 					// 1. sub page
-					lastSbMenu = 2;
-					nextSbMenu = 1;
+					sbMenuLast = 2;
+					sbMenuNext = 1;
 					menuTest("MenuTest 2      ");
-					break;
-				}
+				}break;
 				case 1:{
 					// 2. sub page
-					lastSbMenu = 0;
-					nextSbMenu = 2;
+					sbMenuLast = 0;
+					sbMenuNext = 2;
 					sbmenuTest("SubMenu 21      ");
-					break;
-				}
+				}break;
 				case 2:{
 					// 3. sub page
-					lastSbMenu = 1;
-					nextSbMenu = 0;
+					sbMenuLast = 1;
+					sbMenuNext = 0;
 					sbmenuTest("SubMenu 22      ");
-					break;
-				}
+				}break;
 			}
 		}
 		break;
-}
+	}
 }
 
 void menuWelcome(){
